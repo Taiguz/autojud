@@ -49,7 +49,7 @@ const normalizePort = (val: string) => {
   return false;
 }
 
-const port = normalizePort(process.env.SERVER_PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000');
 
 const onError = (error: { syscall: string; code: any; }) => {
   Logger.error('Server error.', error)
@@ -86,6 +86,7 @@ const onListening = () => {
     : 'port ' + addr?.port;
   Logger.info(`Server online on ${bind}!.`)
   debug('Server online on ' + bind);
+  console.log(`Servidor online! Rodando em ${process.env.PORT}.`)
 }
 
 // TODO enhance the gracefull shutdown?
