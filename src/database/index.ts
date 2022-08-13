@@ -5,7 +5,13 @@ import { isProductionEnv } from "../utils/utils";
 
 
 const options = {
-    logging: (msg: any) => Logger.info(`Database ${msg}`) 
+    logging: (msg: any) => Logger.info(`Database ${msg}`) ,
+    dialectOptions: {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false
+        }
+    }
 }
 
 const getDBUrl = (): string => {
