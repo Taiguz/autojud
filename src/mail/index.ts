@@ -3,7 +3,7 @@ import mailgun from 'nodemailer-mailgun-transport'
 import logger from '../utils/logger'
 import { getEnv } from '../utils/utils'
 
-const api_key = getEnv('MAILGUN_APIKEY')
+const api_key = getEnv('MAILGUN_API_KEY')
 const domain = getEnv('MAILGUN_DOMAIN')
 const appname = getEnv('APP_NAME')
 
