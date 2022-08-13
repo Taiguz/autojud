@@ -31,8 +31,8 @@ export const assertOb = (ob: any, attributes: any): boolean => {
 export const getEnv = (prop: string): string => {
     const env = process.env[prop]
     if(env === undefined){
-        logger.error(`${env} deve ser definido. Saindo...`)
-        console.log(`${env} deve ser definido.`)
+        logger.error(`${prop} deve ser definido. Saindo...`)
+        console.log(`${prop} deve ser definido.`)
         process.exit(-1)
     }
     else 
