@@ -1,6 +1,6 @@
 import { sanitizeObject } from '../utils/utils'
 import { CreateTarefa, Tarefa, Usuario } from './types'
-import { modelTarefa } from '../models/tarefaModel'
+import { modelTarefa } from '../models'
 import validator from 'validator'
 import { Op } from 'sequelize'
 import { TarefaController } from '.'

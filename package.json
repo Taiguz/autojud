@@ -7,7 +7,12 @@
     "start": "node ./dist/app.js",
     "start:dev": "npm run build && DEBUG=autojud:* node ./dist/app.js",
     "start:debug": "npm run build && DEBUG=autojud:* node --inspect ./dist/app.js",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "cron:andamentos": "node ./dist/src/cron/buscarAndamentos.js",
+    "cron:tarefas": "node ./dist/src/cron/buscarTarefasVencimento.js",
+    "cron:andamentos:dev": "npm run build && node ./dist/src/cron/buscarAndamentos.js",
+    "cron:tarefas:dev": "npm run build && node ./dist/src/cron/buscarTarefasVencimento.js",
+    "cron:tarefas:debug": "npm run build && node --inspect ./dist/src/cron/buscarTarefasVencimento.js"
   },
   "dependencies": {
     "axios": "^0.26.0",

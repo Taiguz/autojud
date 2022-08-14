@@ -7,10 +7,6 @@ import processoRouter from './src/routes/processo'
 import rootRouter from './src/routes/root'
 import usuarioRouter from './src/routes/usuario'
 import tarefaRouter from './src/routes/tarefa'
-import { CronJob } from 'cron'
-import { cronBuscarAndamentos, cronBuscarTarefasVencimento } from './src/utils/constants'
-import { buscarTarefasEmVencimento } from './src/notificador/notificadorTarefas'
-import { buscaPeriodicaAndamentos } from './src/buscador'
 
 const debug = require('debug')('autojud:server');
 const rfs = require("rotating-file-stream");
@@ -109,7 +105,8 @@ server.on('listening', onListening);
 process.on('SIGTERM', gracefullShutdown)
 process.on('SIGINT', gracefullShutdown)
 
-new CronJob(cronBuscarTarefasVencimento, buscarTarefasEmVencimento, null, true);
-new CronJob(cronBuscarAndamentos, buscaPeriodicaAndamentos, null, true);
+// Utilização do Heroku Scheduller
+//new CronJob(cronBuscarTarefasVencimento, buscarTarefasEmVencimento, null, true);
+//new CronJob(cronBuscarAndamentos, buscaPeriodicaAndamentos, null, true);
 
 module.exports = app;

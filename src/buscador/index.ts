@@ -17,7 +17,7 @@ import { notificarAndamentosResponsaveis } from "../notificador";
 // api/v1/processos/{processoId}/movimentacoes
 // https://api.escavador.com/docs/?javascript#movimentaes-de-um-processo-que-saram-em-dirios-oficiais
 
-const intervaloBuscaAndamentosTribunalMillis = 500
+const intervaloBuscaAndamentosTribunalMillis = 1000
 
 
 // Busca os andamentos em diários oficiais e no site dos tribunais
@@ -44,6 +44,11 @@ export const buscarAndamentos = async (processo: ModelProcesso, notify: boolean 
         if(ultimoAndamento !== null){
             const novosAndamentos = await AndamentoController
                 .getAllAndamentoProcesso(processo.pro_id, ultimoAndamento.and_id, true)
+            if(novosAndamentos.length === 0){
+                logger.info(`Sem novos andamentos para o processo ${processo.pro_id}.`)
+                return
+            }
+
             const responsaveis = await ProcessoController.getAllReponsaveis(processo.pro_id)
             notificarAndamentosResponsaveis(processo.get(), novosAndamentos, responsaveis)
         }
@@ -93,10 +98,8 @@ const buscaAndamentosTribunais = async (processo: ModelProcesso, notify: boolean
 
         // Revisar isso aqui
         const buscar = async (url: string, params: any) => {
-            console.log('buscando andamentos')
             const { data } = await api.get<RetornoConsultaAndamentoTribunal>(url, params)
             
-            console.log('buscando andamentos: ok')
             const { status } = data
 
             if(!status) throw new Error('Erro na consulta dos andamentos.')

@@ -1,18 +1,22 @@
-import { Sequelize  } from "sequelize";
+import { Options, Sequelize  } from "sequelize";
 import logger from "../utils/logger";
 import Logger from '../utils/logger'
 import { isProductionEnv } from "../utils/utils";
 
 
-const options = {
+const options: Options = {
     logging: (msg: any) => Logger.info(`Database ${msg}`) ,
-    dialectOptions: {
+}
+
+if(isProductionEnv()){
+    options.dialectOptions = {
         ssl: {
             require: true,
             rejectUnauthorized: false
         }
     }
 }
+
 
 const getDBUrl = (): string => {
     if(isProductionEnv()){
@@ -31,8 +35,8 @@ const testConnection = async () => {
         await sequelize.authenticate()
         Logger.info('Successfully connected to the database!')
     } catch(error){
-        // TODO Does the process has use whithout a database connection?
         Logger.error('Could not connect to database.', error)
+        process.exit(-1)
     }
 }
 

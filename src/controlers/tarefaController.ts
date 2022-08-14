@@ -1,6 +1,6 @@
 import { sanitizeObject } from '../utils/utils'
 import { CreateTarefa, Tarefa, Usuario } from './types'
-import { modelTarefa } from '../models/tarefaModel'
+import { modelTarefa } from '../models'
 import { UsuarioController } from '.'
 import { modelProcesso, modelTarefaResponsavel } from '../models'
 import { Op } from 'sequelize'
@@ -109,7 +109,6 @@ export const getAllParaVencimentoParaResponsaveis = async (): Promise<Responsave
             responsaveis[usu_id].tarefas.push(tarefa.get())
         })
     })
-    debugger
 
     return responsaveis
 }

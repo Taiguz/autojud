@@ -14,8 +14,7 @@ import { modelProcessoResponsavel } from './responsavelProcessoModel'
 import { modelTarefaResponsavel } from './responsavelTarefaModel'
 
 // Relacionamentos
-
-modelProcesso.hasMany(modelAndamento, { foreignKey: 'pro_id', as: 'andamentos'}),
+modelProcesso.hasMany(modelAndamento, { foreignKey: 'pro_id', as: 'andamentos'})
 
 modelProcesso.hasMany(modelTarefa, { foreignKey: 'pro_id', as: 'tarefas'})
 
@@ -31,4 +30,4 @@ modelTarefa.belongsToMany(modelUsuario, { through: modelTarefaResponsavel, forei
 
 modelUsuario.belongsToMany(modelTarefa, { through: modelTarefaResponsavel, foreignKey: 'tar_id' })
 
-export {modelOptions, modelUsuario, modelProcesso, modelAndamento, modelProcessoResponsavel, modelTarefaResponsavel}
+export {modelOptions, modelUsuario, modelProcesso, modelAndamento, modelTarefa, modelProcessoResponsavel, modelTarefaResponsavel}
