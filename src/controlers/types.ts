@@ -34,6 +34,15 @@ export interface CreateUsuario {
     usu_administrador: boolean
 }
 
+export interface EditarUsuario {
+    usu_id: number
+    usu_tag?: string
+    usu_oab?: string
+    usu_senha?: string
+    usu_verificado?: boolean
+    usu_administrador?: boolean
+}
+
 export interface Usuario {
     usu_id: number
     usu_tag: string
@@ -64,4 +73,26 @@ export interface Tarefa {
     and_id?: number
     subtarefas?: Tarefa[]
     processo?: Processo
+}
+
+export interface CreateNotificacao {
+    not_aviso: string
+    not_data_envio: string
+    not_visto: boolean
+    not_importancia: number
+    pro_id: number
+    tar_id?: number
+    and_id?: number
+    usu_id: number
+}
+
+export interface Notificacao {
+    not_id: number
+    not_aviso: string
+    not_data_envio: string
+    not_visto: boolean
+    not_importancia: number
+    pro_id: number
+    tar_id?: number
+    usu_id: number
 }

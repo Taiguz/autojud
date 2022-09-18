@@ -1,5 +1,6 @@
 require('dotenv').config()
 import http from 'http'
+import cors from 'cors'
 import Logger from './src/utils/logger'
 import { dataHoje } from './src/utils/dataUtils'
 import database from './src/database'
@@ -7,6 +8,11 @@ import processoRouter from './src/routes/processo'
 import rootRouter from './src/routes/root'
 import usuarioRouter from './src/routes/usuario'
 import tarefaRouter from './src/routes/tarefa'
+import andamentoRouter from './src/routes/andamento'
+import notificacaoRouter from './src/routes/notificacao'
+import { isProductionEnv } from './src/utils/utils'
+import { buscarTarefasEmVencimento } from './src/notificador/notificadorTarefas'
+import { buscaPeriodicaAndamentos } from './src/buscador'
 
 const debug = require('debug')('autojud:server');
 const rfs = require("rotating-file-stream");
@@ -28,12 +34,18 @@ app.use(logger('dev', { stream })); //  Requests logs
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/processo', processoRouter);
-app.use('/usuario', usuarioRouter);
-app.use('/tarefa', tarefaRouter)
-app.use('/', rootRouter);
+if(!isProductionEnv())
+  app.use(cors())
+
+app.use('/', express.static(path.join(__dirname, '..', 'front', 'build')));
+
+app.use('/api/processo', processoRouter);
+app.use('/api/andamento', andamentoRouter);
+app.use('/api/usuario', usuarioRouter);
+app.use('/api/tarefa', tarefaRouter)
+app.use('/api/notificacao', notificacaoRouter)
+app.use('/api/', rootRouter);
 
 
 const normalizePort = (val: string) => {
@@ -104,6 +116,10 @@ server.on('listening', onListening);
 
 process.on('SIGTERM', gracefullShutdown)
 process.on('SIGINT', gracefullShutdown)
+
+//buscarTarefasEmVencimento()
+
+//buscaPeriodicaAndamentos()
 
 // Utilização do Heroku Scheduller
 //new CronJob(cronBuscarTarefasVencimento, buscarTarefasEmVencimento, null, true);

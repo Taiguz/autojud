@@ -72,7 +72,7 @@ export const modelUsuario = database.define<ModelUsuario>('usuario', {
         //TODO: Não estou checando se a oab existe somente se tem um formato válido. Checar a existência no futuro?
         validate: {
             is: {
-                args: /[A-Z]{2}[0-9]{6}/,
+                args: /^[A-Z]{2}[0-9]{6}$/,
                 msg: 'A oab do usuário não possui o formato adequado.'
             },
             notEmpty: {

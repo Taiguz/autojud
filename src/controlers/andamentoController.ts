@@ -19,7 +19,9 @@ export const create = async (andamento: CreateAndamento) => {
 // Can return undefined if not found
 export const get = async (and_id: number) => {
     const andamento = await modelAndamento.findByPk(and_id, { attributes })
-    return andamento ? andamento.get() : null
+    if(andamento === null)
+        throw new Error("Andamento não existe.")
+    return andamento.get()
 }
 
 export const getInstance = async (and_id: number) => {
@@ -50,15 +52,23 @@ export const getAll = async () => {
 
 export const getAllAndamentoProcesso = async (pro_id: number, last_and_id: number = 0, greater: boolean = false): Promise<Andamento[]> => {
     let comparator = greater ? Op.gt : Op.lt
+    console.log(greater ? 'greater' : 'less')
     const andamentos = await modelAndamento.findAll({ 
         where:{
             pro_id,
             and_id: last_and_id === 0 ? { [Op.gt]: 0 } : { [comparator]: last_and_id }
         },
-        order: [['and_id', 'DESC']],
+        order: (greater && last_and_id !== 0) ? [['and_id', 'ASC']] : [['and_id', 'DESC']],
         attributes,
         limit: defaultPageLimit
     })
+    if(greater && last_and_id !== 0)
+        return andamentos.map(andamento => andamento.get()).reverse()
     return andamentos.map(andamento => andamento.get())
+}
+
+export const countAndamentosProcesso = async (pro_id: number): Promise<number> => {
+    const count = await modelAndamento.count({ where: { pro_id }})
+    return count
 }
 

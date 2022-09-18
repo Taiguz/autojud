@@ -19,15 +19,25 @@ const andamentosPorPagina = 25
 // TODO: validar processo antes de cadastrar
 export const create = async (processo: CreateProcesso): Promise<Processo> => {
     const createdProcesso = await modelProcesso.create(processo)
-    buscarAndamentos(createdProcesso, false)
+    //buscarAndamentos(createdProcesso, false)
     return sanitizeObject(createdProcesso.get(), attributes)
 }
 
 // Can return undefined if not found
-export const get = async (pro_id: number): Promise<Processo | null> => {
+export const get = async (pro_id: number): Promise<Processo> => {
     const processo = await modelProcesso.findByPk(pro_id, { attributes })
-    return processo ? processo.get() : null
+    if(processo === null)
+        throw new Error('Processo não existe.')
+    return processo.get()
 }
+
+export const getByCNJ = async (pro_cnj: string): Promise<Processo> => {
+    const processo = await modelProcesso.findOne({ where: { pro_cnj },  attributes })
+    if(processo === null)
+        throw new Error('Processo não existe')
+    return processo 
+}
+
 
 export const getProcessos = async (pro_id: number[]): Promise<Processo[]> => {
     const processos = await modelProcesso.findAll({ where: { pro_id }, attributes})
@@ -67,8 +77,8 @@ export const getAllInstances = async (): Promise<ModelProcesso[]> => {
     return processos
 }
 
-export const getAllAndamentos = async (pro_id: number, last_and_id: number = 0): Promise<Andamento[]> => {
-    const andamentos = await AndamentoController.getAllAndamentoProcesso(pro_id, last_and_id)
+export const getAllAndamentos = async (pro_id: number, last_and_id: number = 0, greater: boolean = true): Promise<Andamento[]> => {
+    const andamentos = await AndamentoController.getAllAndamentoProcesso(pro_id, last_and_id, greater)
     return andamentos
 }
 

@@ -2,7 +2,8 @@ import { NextFunction, Request, Response } from "express"
 import { Request as JWTRequest } from "express-jwt"
 import { ValidationError } from "sequelize"
 import validator from "validator"
-import { UsuarioController } from "../../controlers"
+import { NotificacaoController, UsuarioController } from "../../controlers"
+import { Usuario } from "../../controlers/types"
 import { decodeToken } from "../../controlers/usuarioController"
 import { httpCodes } from '../../utils/constants'
 import { AuthError, AuthErrorUnVerifiedAccount, CustomValidatorError } from "../../utils/erros"
@@ -17,7 +18,15 @@ export const createUsuario = async (request: Request, response: Response) => {
     try { 
         if(usu_tag === undefined)
             usuario.usu_tag = getEmailTag(usu_email)
-        const novoUsuario = await UsuarioController.create(usuario)
+
+        const novoUsuario = await UsuarioController.create({ 
+            usu_oab: usuario.usu_oab,
+            usu_email,
+            usu_senha: usuario.usu_senha,
+            usu_administrador: usuario.usu_administrador || false,
+            usu_tag,
+        })
+
         response.status(httpCodes.CREATED).json(novoUsuario)
     }
     catch(error){
@@ -62,9 +71,9 @@ export const deletarUsuario = async (request: JWTRequest, response: Response) =>
 }
 
 export const atualizarUsuario = async (request: Request, response: Response) => {
-    const usuario = request.body
+    const { usu_id, usu_tag, usu_oab, usu_administrador } = request.body
     try {
-        await UsuarioController.update(usuario)
+        await UsuarioController.update({ usu_id, usu_tag, usu_oab, usu_administrador })
         response.status(httpCodes.OK).json({ message: 'Usuário atualizado.'})
     }
     catch(error){
@@ -80,16 +89,44 @@ export const atualizarUsuario = async (request: Request, response: Response) => 
     }
 }
 
+export const getCurrentUsuario = async (request: Request, response: Response) => {
+    try {
+        
+        const user_id = getUserID(request)
+
+        const usuario = await UsuarioController.get(user_id)
+
+        if(usuario === null)
+            throw new Error('Usuário não existe.')
+        
+        response.status(httpCodes.OK).json(usuario)
+    }
+    catch(error){
+        logger.error('Erro ao retornar usuário.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar usuário.'})
+    }
+}
+
 export const getUsuario = async (request: Request, response: Response) => {
     try {
-        if(!validator.isInt(request.params.usu_id, { min: 1, allow_leading_zeroes: false}))
-            throw new Error('Parâmetros de requisição inválidos.')
-        const usu_id = parseInt(request.params.usu_id)
-        const usuario = await UsuarioController.get(usu_id)
-        if (usuario !== null)
-            response.status(httpCodes.OK).json(usuario)
-        else
-            response.status(httpCodes.SERVER_ERROR).json({message: 'Usuário não existe.'})
+        let isUsuId = false
+        if(validator.isInt(request.params.usu_id, { min: 1, allow_leading_zeroes: false}))
+            isUsuId = true
+        if(!isUsuId && !validator.isAlphanumeric(request.params.usu_id) && !validator.isLength(request.params.usu_id, { min: 4, max: 20}))
+            throw new Error('Tag de usuário inválida.')
+
+    
+        let usuario: Usuario | null
+        if(isUsuId)
+            usuario = await UsuarioController.get(parseInt(request.params.usu_id))
+        else{
+            usuario = await UsuarioController.getByTag(request.params.usu_id)
+        }
+
+        if(usuario === null)
+            throw new Error('Usuário não existe.')
+        
+        response.status(httpCodes.OK).json(usuario)
     }
     catch(error){
         logger.error('Erro ao retornar usuário.', error)
@@ -101,8 +138,8 @@ export const verificarUsuarioTrocarSenha = async (request: Request, response: Re
     try {
         const { senha_atual, nova_senha } = request.body
         if(!validator.isJWT(request.params.token) ||
-           !validator.isStrongPassword(senha_atual, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1}) ||
-           !validator.isStrongPassword(nova_senha, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1}))
+           !validator.isStrongPassword(senha_atual, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false}) ||
+           !validator.isStrongPassword(nova_senha, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false}))
             throw new Error('Parâmetros de requisição inválidos.')
         const { usu_id } = await decodeToken(request.params.token, segredoVerificarEmail)
         await UsuarioController.changePassword(usu_id, senha_atual, nova_senha)
@@ -140,13 +177,50 @@ export const autenticarUsuario = async (request: Request, response: Response) =>
 
 export const getProcessosResponsabilidade = async (request: JWTRequest, response: Response) => {
     try {
-        const usu_id = getUserID(request)
+        let usu_id: number
+
+        if(validator.isInt(request.params.usu_id || '', { min: 1, allow_leading_zeroes: false}))
+            usu_id = parseInt(request.params.usu_id)
+        else
+            usu_id = getUserID(request)
+
         const processos = await UsuarioController.getAllProcessosSobreResponsabilidade(usu_id)
         response.status(httpCodes.OK).json(processos)
     }
     catch(error){
         logger.error('Erro ao retornar processos sobre responsabilidade.', error)
         response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar processos sobre responsabilidade.'})
+    }
+}
+
+export const getTarefasResponsabilidade = async (request: JWTRequest, response: Response) => {
+    try {
+        let usu_id: number
+
+        if(validator.isInt(request.params.usu_id || '', { min: 1, allow_leading_zeroes: false}))
+            usu_id = parseInt(request.params.usu_id)
+        else
+            usu_id = getUserID(request)
+
+        const tarefas = await UsuarioController.getAllTarefasSobreResponsabilidade(usu_id)
+        response.status(httpCodes.OK).json(tarefas)
+    }
+    catch(error){
+        logger.error('Erro ao retornar tarefas sobre responsabilidade.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar tarefas sobre responsabilidade.'})
+    }
+}
+
+export const getNotificacoesNaoVistas = async (request: JWTRequest, response: Response) => {
+    try {
+        const usu_id = getUserID(request)
+
+        const notificacoes = await NotificacaoController.getAllNotSeenUserNotifications(usu_id)
+        response.status(httpCodes.OK).json(notificacoes)
+    }
+    catch(error){
+        logger.error('Erro ao retornar notificacoes do usuário.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar notificações do usuário.'})
     }
 }
 
