@@ -64,7 +64,7 @@ const Processo: React.FC = () => {
 
     const exlcuirProcesso = async () => {
         try{
-            await api.delete(`/processo/${processoId}`)
+            await api.delete(`/processo/${processo.pro_id}`)
             navigate('/processos')
             addNotification(`Processo "${processo.pro_titulo}" excluído com sucesso.`)
         }
@@ -89,7 +89,7 @@ const Processo: React.FC = () => {
         try{
             const novaTarefa = await adicionarTarefa(tarefa, processo.pro_id)
             addNotification('Tarefa adicionada com sucesso.')
-            navigate(`/processos/${processo.pro_id}/tarefas/${novaTarefa.tar_id}`)
+            navigate(`/processos/${processo.pro_cnj}/tarefas/${novaTarefa.tar_id}`)
         }
         catch(erro: any){
             showError('Erro ao adicionar tarefa.', erro as Error)
@@ -139,13 +139,13 @@ const Processo: React.FC = () => {
                     <h3>Últimos Andamentos</h3>
                     <hr/>
                     {andamentos.length > 0 ?
-                        <Ul>{andamentos.slice(0, 5).map(andamento => <Andamento key={v4()} andamento={andamento} processoId={processoId}/>)}</Ul> :
+                        <Ul>{andamentos.slice(0, 5).map(andamento => <Andamento key={v4()} andamento={andamento} processoId={processo.pro_cnj}/>)}</Ul> :
                         <>Nenhum andamento.</>
                     }
-                    { andamentos.length > 5 ? <Link to={`/processos/${processoId}/andamentos`}>Ver mais...</Link> : null}
+                    { andamentos.length > 5 ? <Link to={`/processos/${processo.pro_cnj}/andamentos`}>Ver mais...</Link> : null}
                 </Col>
                 <Col style={{ width: '50%'}} >
-                    <ListaResponsaveis url={`processo/${processoId}/responsavel`}/>
+                    <ListaResponsaveis url={`processo/${processo.pro_id}/responsavel`}/>
                 </Col>
             </Row>
             <Row style={{ marginTop: '10px'}}>
@@ -159,11 +159,11 @@ const Processo: React.FC = () => {
                 </div>
                 <hr/>
                 {tarefas.length > 0 ?
-                    <Ul>{tarefas.slice(0,5).map(tarefa => <Tarefa key={v4()} tarefa={tarefa} processoId={processoId}/>)}</Ul> :
+                    <Ul>{tarefas.slice(0,5).map(tarefa => <Tarefa key={v4()} tarefa={tarefa} processoId={processo.pro_cnj}/>)}</Ul> :
                     <>Nenhuma tarefa.</>
                 }
 
-                { tarefas.length > 5 ? <Link to={`/processos/${processoId}/tarefas`}>Ver mais...</Link> : null}
+                { tarefas.length > 5 ? <Link to={`/processos/${processo.pro_cnj}/tarefas`}>Ver mais...</Link> : null}
             </Row>
         </CustomContainer>
     )

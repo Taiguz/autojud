@@ -24,6 +24,7 @@ const ModalAdicionarResponsaveis: React.FC<Props> = ({ show, setShow, adicionar 
     const [selecionados, setSelecionados] = useState<IUsuario[]>([])
     const [adicionando, setAdicionando] = useState(false)
     const [carregando, setCarregando] = useState(true)
+    const [validar, setValidar] = useState(false)
     const showError = useError()
 
     const handleClose = () => {
@@ -47,8 +48,17 @@ const ModalAdicionarResponsaveis: React.FC<Props> = ({ show, setShow, adicionar 
     }, [setShow, showError])
 
     const adicionarResponsaveis = async () => {
+        if(selecionados.length === 0 && usuarios.find(({ usu_tag }) => usu_tag === tag) === undefined){
+            setValidar(true)
+            return
+        }
         setAdicionando(true)
-        await adicionar(selecionados)
+        if(selecionados.length === 0){
+            const usuario = usuarios.find(({ usu_tag }) => usu_tag === tag) as IUsuario
+            await adicionar([usuario])
+        }
+        else
+            await adicionar(selecionados)
         setShow(false)
     }
 
@@ -75,28 +85,35 @@ const ModalAdicionarResponsaveis: React.FC<Props> = ({ show, setShow, adicionar 
                 <InputGroup className="mb-3">
                     <Form.Control
                         autoFocus 
-                        placeholder="@" 
+                        placeholder="Tag do usuário..." 
                         type="input"
                         list="user-data"
                         value={tag}
                         onChange={({ target: { value }}) => setTag(value)}
+                        isInvalid={validar && usuarios.find(({ usu_tag }) => usu_tag === tag) === undefined}
                     />
                     <datalist id="user-data">
                         {usuarios.map(({ usu_tag, usu_id }) => <option key={usu_id} value={usu_tag}>{usu_tag}</option>)}
                     </datalist>
-                    <BButton variant="secondary" onClick={() => selecionarUsuario(tag)}>Inserir</BButton>
+                    <Form.Control.Feedback type="invalid" tooltip>
+                        Insira uma tag de usuário valida.
+                    </Form.Control.Feedback>
+                    <BButton variant="secondary" onClick={() => selecionarUsuario(tag)}>Inserir na lista</BButton>
                 </InputGroup>
                 <Ul>
-                    {selecionados.map(({ usu_tag }) => 
-                        <Li className="d-flex justify-content-between align-items-center" key={v4()}>
-                            <div>
-                                <AiOutlineUser width={40} style={{marginRight: '10px'}}/> 
-                                <span>{usu_tag}</span>
-                            </div>
-                            <ButtonIcon title="Remover responsável da lista." onClick={() => removerResponsavel(usu_tag)}>
-                                <AiOutlineDelete width={40}/>
-                            </ButtonIcon>
-                        </Li>)}
+                    {selecionados.length === 0 ?
+                        <p>Insira na lista para adicionar vários responsáveis.</p> :
+                        selecionados.map(({ usu_tag }) => 
+                            <Li className="d-flex justify-content-between align-items-center" key={v4()}>
+                                <div>
+                                    <AiOutlineUser width={40} style={{marginRight: '10px'}}/> 
+                                    <span>{usu_tag}</span>
+                                </div>
+                                <ButtonIcon title="Remover responsável da lista." onClick={() => removerResponsavel(usu_tag)}>
+                                    <AiOutlineDelete width={40}/>
+                                </ButtonIcon>
+                            </Li>)
+                    }
                 </Ul>
                 </>
             }

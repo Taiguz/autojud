@@ -35,11 +35,11 @@ const ModalEditarProcesso: React.FC<Props> = ({ show, setShow, editar, processoE
 
     return (
         <Modal show={show} onHide={handleClose} centered>
-        <Form onSubmit={adicionarProcesso}>
             <Modal.Header closeButton>
                 <Modal.Title>Editar processo</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <Form onSubmit={adicionarProcesso} id="editarProcesso">
                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                         <Form.Label>Título do processo</Form.Label>
                         <Form.Control 
@@ -54,12 +54,12 @@ const ModalEditarProcesso: React.FC<Props> = ({ show, setShow, editar, processoE
                         <Form.Control.Feedback type="invalid">Utilize apenas letras e números.</Form.Control.Feedback>
                         <Form.Control.Feedback type="invalid">Use de 4 a 200 caracteres.</Form.Control.Feedback>
                     </Form.Group>
+                </Form>
             </Modal.Body>
             <Modal.Footer>
                 <Button onClick={handleClose} disabled={salvando}>Cancelar</Button>
-                <Button type="submit" level="primary" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar'}</Button>
+                <Button type="submit" form="editarProcesso" level="primary" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar'}</Button>
             </Modal.Footer>
-        </Form>
         </Modal>
     )
 }

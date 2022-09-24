@@ -36,11 +36,11 @@ const ModalEditarTarefa: React.FC<Props> = ({ show, setShow, isSubtarefa, tarefa
 
     return (
         <Modal show={show} onHide={handleClose} centered>
-        <Form onSubmit={aoConcluirTarefa}>
             <Modal.Header closeButton>
                 <Modal.Title>Editar {isSubtarefa ? 'subtarefa' : 'tarefa'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <Form onSubmit={aoConcluirTarefa} id="editarTarefa">
                 <Form.Group className="mb-3">
                     <Form.Label>{isSubtarefa ? 'Descrição da subtarefa' : 'Objetivo da tarefa'}</Form.Label>
                     <Form.Control 
@@ -74,12 +74,12 @@ const ModalEditarTarefa: React.FC<Props> = ({ show, setShow, isSubtarefa, tarefa
                     />
                     <Form.Control.Feedback type="invalid">Insira uma data válida.</Form.Control.Feedback>
                 </Form.Group>
+                </Form>
             </Modal.Body>
             <Modal.Footer>
                 <Button onClick={handleClose} disabled={concluindo}>Cancelar</Button>
-                <Button type="submit" level="primary" disabled={concluindo}>{concluindo ? 'Salvando...' : 'Salvar'}</Button>
+                <Button type="submit" form="editarTarefa" level="primary" disabled={concluindo}>{concluindo ? 'Salvando...' : 'Salvar'}</Button>
             </Modal.Footer>
-        </Form>
         </Modal>
     )
 }

@@ -14,7 +14,6 @@ interface Props {
 
 const Tarefa: React.FC<Props> = ({ tarefa: { tar_objetivo, tar_data_termino, tar_situacao, tar_id }, processoId }) => {
 
-    const navigate = useNavigate()
 
     return (
         <LiTarefa as={Link} style={{ backgroundColor: tar_situacao ? 'lightgreen' : 'white'}} situacao={tar_situacao} to={`/processos/${processoId}/tarefas/${tar_id}`}>

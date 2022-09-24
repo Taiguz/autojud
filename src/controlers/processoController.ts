@@ -19,7 +19,7 @@ const andamentosPorPagina = 25
 // TODO: validar processo antes de cadastrar
 export const create = async (processo: CreateProcesso): Promise<Processo> => {
     const createdProcesso = await modelProcesso.create(processo)
-    //buscarAndamentos(createdProcesso, false)
+    buscarAndamentos(createdProcesso, false)
     return sanitizeObject(createdProcesso.get(), attributes)
 }
 
@@ -109,11 +109,11 @@ export const saveNewAndamentos = async (pro_id: number, andamentos: CreateAndame
 
     andamentosFiltrados = andamentosFiltrados.sort((a,b) => parseISO(a.and_data).getTime() - parseISO(b.and_data).getTime())
 
-    const novosAndamentos = await modelAndamento.bulkCreate(andamentosFiltrados)
+    const novosAndamentos = await AndamentoController.createBulk(andamentosFiltrados)
     // TODO: Notificar notificáveis
     // notificar(novosAndamentos)
 
-    return novosAndamentos.map(andamento => andamento.get())
+    return novosAndamentos
 }
 
 

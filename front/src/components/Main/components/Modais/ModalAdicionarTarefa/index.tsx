@@ -33,12 +33,12 @@ const ModalAdicionarTarefa: React.FC<Props> = ({ show, setShow, adicionar }) => 
     }
 
     return (
-        <Modal show={show} onHide={handleClose} centered>
-        <Form onSubmit={adicionarTarefa}>
+        <Modal show={show} onHide={handleClose} centered backdrop="static">
             <Modal.Header closeButton>
                 <Modal.Title>Adicionar tarefa</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <Form onSubmit={adicionarTarefa} id="adicionarTarefa">
                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                     <Form.Label>Objetivo da tarefa</Form.Label>
                     <Form.Control 
@@ -64,12 +64,12 @@ const ModalAdicionarTarefa: React.FC<Props> = ({ show, setShow, adicionar }) => 
                     />
                     <Form.Control.Feedback type="invalid">Utilize apenas letras e números.</Form.Control.Feedback>
                 </Form.Group>
+                </Form>
             </Modal.Body>
             <Modal.Footer>
                 <Button onClick={handleClose} disabled={adicionando}>Cancelar</Button>
-                <Button type="submit" level="primary" disabled={adicionando}>{adicionando ? 'Adicionando...' : 'Adicionar'}</Button>
+                <Button type="submit" form="adicionarTarefa" level="primary" disabled={adicionando}>{adicionando ? 'Adicionando...' : 'Adicionar'}</Button>
             </Modal.Footer>
-        </Form>
         </Modal>
     )
 }

@@ -1,7 +1,7 @@
 import database from '../database'
 import { Model, Op } from 'sequelize'
 import { CreateAndamento, Andamento } from './types'
-import { sanitizeObject } from '../utils/utils'
+import { sanitizeAndamento, sanitizeObject } from '../utils/utils'
 import { modelAndamento } from '../models'
 import { defaultPageLimit } from '../utils/constants'
 
@@ -12,8 +12,14 @@ import { defaultPageLimit } from '../utils/constants'
 export const attributes = ['and_data', 'and_descricao', 'and_id']
 
 export const create = async (andamento: CreateAndamento) => {
+    sanitizeAndamento(andamento)
     const createdAndamento = await modelAndamento.create(andamento)
     return sanitizeObject(createdAndamento.get(), attributes)
+}
+export const createBulk = async (andamentos: CreateAndamento[]) => {
+    andamentos.forEach(a => sanitizeAndamento(a))
+    const novosAndamentos = await modelAndamento.bulkCreate(andamentos)
+    return novosAndamentos.map(a => a.get())
 }
 
 // Can return undefined if not found
@@ -46,7 +52,7 @@ export const remove = async (and_id: number) => {
 }
 
 export const getAll = async () => {
-    const andamentos = await modelAndamento.findAll({ attributes})
+    const andamentos = await modelAndamento.findAll({ attributes })
     return andamentos.map(andamento => andamento.get())
 }
 

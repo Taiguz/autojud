@@ -1,4 +1,5 @@
 import { Request } from "express-jwt"
+import { Andamento, CreateAndamento } from "../../controlers/types"
 import logger from "../logger"
 
 export const sanitizeObject = (ob: any, attributes: string[], include: boolean = true) => {
@@ -50,4 +51,8 @@ export const getUserID = (request: Request): number => {
     if(usu_id === undefined)
         throw new Error("Sem autorização.")
     return usu_id
+}
+
+export const sanitizeAndamento = (andamento: Andamento | CreateAndamento) => {
+    andamento.and_descricao = andamento.and_descricao.replaceAll(/<[^><]+>/g, '')
 }

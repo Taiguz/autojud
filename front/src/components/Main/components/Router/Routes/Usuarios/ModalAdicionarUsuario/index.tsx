@@ -36,11 +36,11 @@ const ModalAdicionarUsuario: React.FC<Props> = ({ show, setShow, adicionar }) =>
 
     return (
         <Modal show={show} onHide={handleClose} centered>
-            <Form onSubmit={adicionarUsuario}>
                 <Modal.Header closeButton>
                     <Modal.Title>Adicionar usuário</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    <Form onSubmit={adicionarUsuario} id="adicionarUsuario">
                     <Form.Group className="mb-3">
                         <Form.Label>Tag única</Form.Label>
                         <Form.Control 
@@ -84,12 +84,12 @@ const ModalAdicionarUsuario: React.FC<Props> = ({ show, setShow, adicionar }) =>
                     <Form.Group className="mb-3">
                         <Form.Check type="checkbox" label="Administrador" checked={usuario.usu_administrador} onChange={({ target: { checked }}) => setUsuario({...usuario, usu_administrador: checked}) } />
                     </Form.Group>
+                    </Form>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={handleClose} disabled={adicionando}>Cancelar</Button>
-                    <Button type="submit" level="primary" disabled={adicionando}>{adicionando ? 'Adicionando...' : 'Adicionar'}</Button>
+                    <Button type="submit" form="adicionarUsuario" level="primary" disabled={adicionando}>{adicionando ? 'Adicionando...' : 'Adicionar'}</Button>
                 </Modal.Footer>
-            </Form>
         </Modal>
     )
 }

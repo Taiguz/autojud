@@ -1,4 +1,4 @@
-import { generate } from 'generate-password-browser'
+import { AxiosError } from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Container } from 'react-bootstrap'
 import { AiOutlineFileAdd } from 'react-icons/ai'
@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router'
 import { v4 } from 'uuid'
 import { MainContext, useError, useMessage, useNotification } from '../../../..'
 import api from '../../../../../../api'
+import { gerarSenha } from '../../../../../../utils'
 import ButtonIcon from '../../../ButtonIcon'
 import Loader from '../../../Loader'
 import { IUsuario } from '../Usuario/types'
@@ -49,13 +50,16 @@ const Usuarios: React.FC = () => {
     const adicionarUsuario = async (usuario: IUsuario) => {
         try{
             const { usu_email, usu_tag, usu_oab, usu_administrador } = usuario
-            const senha = generate({ length: 8, numbers: true, symbols: true, uppercase: true })
+            const senha = gerarSenha()
             const { data: novoUsuario } = await api.post<IUsuario>('/usuario', { usu_email, usu_tag, usu_oab, usu_senha: senha, usu_administrador})
             navigate(`/usuarios/${novoUsuario.usu_tag}`)
             addNotification(`Usuário "${novoUsuario.usu_tag}" adicionado.`)
             showMessage(`Um email foi enviado para ${usu_email}.\nO usuário deve entrar no link enviado para seu e-mail e alterar sua senha para poder realizar login no sistema.\nA senha atual da conta é: ${senha}`)
         }
         catch(erro: any){
+            if(erro instanceof(AxiosError) && erro.message){
+                showError(`Houve um erro ao adicionar usuário.\n${erro.message}`, erro as Error)
+            }
             showError('Houve um erro ao adicionar usuário.', erro as Error)
         }
     }

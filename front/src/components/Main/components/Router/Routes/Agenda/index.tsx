@@ -59,12 +59,12 @@ const Agenda: React.FC = () => {
 
     const eventContent = (info: EventContentArg) => {
         const { event: { extendedProps: { tarefa } }, view } = info
-        const { processo: { pro_titulo, pro_id }, tar_objetivo, tar_id } = tarefa
+        const { processo: { pro_titulo, pro_cnj }, tar_objetivo, tar_id } = tarefa
 
         const objetivo = limitString(tar_objetivo, view.type !== 'mensal' ? 200 : 25)
         return (
-            <Link to={`/processos/${pro_id}/tarefas/${tar_id}`} style={{ textDecoration: 'none', color: 'black'}}>
-                <div title={tar_objetivo}><span style={{ fontWeight: 'bold'}}>{pro_titulo}</span>: {objetivo}</div>
+            <Link to={`/processos/${pro_cnj}/tarefas/${tar_id}`} style={{ textDecoration: 'none', color: 'black'}}>
+                <div title={tar_objetivo} style={{ textOverflow: 'ellipsis', overflow: 'hidden'}}><span style={{ fontWeight: 'bold'}}>{pro_titulo}</span>: {objetivo}</div>
             </Link>
         )
     }

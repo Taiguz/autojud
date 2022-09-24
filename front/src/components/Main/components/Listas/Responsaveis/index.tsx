@@ -57,7 +57,10 @@ const ListaResponsaveis: React.FC<Props> = ({ url, style }) => {
             const usuario = responsaveis.find(u => u.usu_id === usu_id)
             if(!usuario) throw new Error('Usuário não encontrado.')
             addNotification(`Responsável ${usuario.usu_tag} removido.`)
-            setResponsaveis(r => r.splice(r.indexOf(usuario), 1))
+            setResponsaveis(r => {
+                r.splice(r.indexOf(usuario), 1)
+                return r
+            })
         }
         catch(error){
             showError('Erro ao remover responsável.')

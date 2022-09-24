@@ -13,6 +13,7 @@ import notificacaoRouter from './src/routes/notificacao'
 import { isProductionEnv } from './src/utils/utils'
 import { buscarTarefasEmVencimento } from './src/notificador/notificadorTarefas'
 import { buscaPeriodicaAndamentos } from './src/buscador'
+import { Request, Response } from 'express'
 
 const debug = require('debug')('autojud:server');
 const rfs = require("rotating-file-stream");
@@ -38,14 +39,19 @@ app.use(cookieParser());
 if(!isProductionEnv())
   app.use(cors())
 
-app.use('/', express.static(path.join(__dirname, '..', 'front', 'build')));
+  
+  app.use('/api/processo', processoRouter);
+  app.use('/api/andamento', andamentoRouter);
+  app.use('/api/usuario', usuarioRouter);
+  app.use('/api/tarefa', tarefaRouter)
+  app.use('/api/notificacao', notificacaoRouter)
+  app.use('/api/', rootRouter);
 
-app.use('/api/processo', processoRouter);
-app.use('/api/andamento', andamentoRouter);
-app.use('/api/usuario', usuarioRouter);
-app.use('/api/tarefa', tarefaRouter)
-app.use('/api/notificacao', notificacaoRouter)
-app.use('/api/', rootRouter);
+  app.use(express.static(path.join(__dirname, '..', 'front', 'build')));
+
+  app.get('/*', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
+  });
 
 
 const normalizePort = (val: string) => {

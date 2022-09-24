@@ -10,7 +10,7 @@ export enum httpCodes {
 
 export const defaultPageLimit = 20
 
-export const regValidadeTextFields = /^[A-Za-z0-9ÃÁÉÍÓÚãáéíóúàç,. ]+$/
+export const regValidadeTextFields = /^[A-Za-z0-9ÃÁÉÍÓÚãáéíóúàâêîôûÂÊÎÔÛç\-,. ]+$/
 
 // TODO: Isso deve ser personalisável
 export const diasDeAntecedenciaParaAvisoTarefas = 3;

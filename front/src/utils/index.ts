@@ -32,3 +32,25 @@ export const getHojeDate = () => {
     const hoje = new Date()
     return parseISO(dateToISOSTring(hoje))
 }
+
+// min e max inclusivos
+export const getRandomInt = (min: number, max: number): number => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const getRandomSymbol = (): string => {
+    return String.fromCharCode(getRandomInt(33,47))
+}
+const getRandomChar = (): string => {
+    return String.fromCharCode(getRandomInt(97,122))
+}
+
+export const gerarSenha = (tamanho: number = 8) => {
+    let senha = getRandomSymbol() + getRandomChar().toUpperCase() + String(getRandomInt(0, 9))
+    const tamanhoMaximo = getRandomInt(8, tamanho + 3)
+    for(let index = 0; index < tamanhoMaximo; index++)
+        senha += String.fromCharCode(getRandomInt(33, 126))
+    return senha
+}

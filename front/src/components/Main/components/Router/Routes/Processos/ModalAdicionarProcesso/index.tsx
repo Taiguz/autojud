@@ -33,14 +33,13 @@ const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) =
         }
     }
 
-
     return (
-        <Modal show={show} onHide={handleClose} centered>
-            <Form onSubmit={adicionarProcesso}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Adicionar processo</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
+        <Modal show={show} onHide={handleClose} centered backdrop="static">
+            <Modal.Header closeButton>
+                <Modal.Title>Adicionar processo</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form onSubmit={adicionarProcesso} id="adicionarProcesso">
                     <Form.Group className="mb-3">
                         <Form.Label>Título do processo</Form.Label>
                         <Form.Control 
@@ -58,7 +57,6 @@ const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) =
                     <Form.Group className="mb-3">
                         <Form.Label>Número CNJ</Form.Label>
                         <Form.Control 
-                            autoFocus
                             required
                             type="text" 
                             placeholder="000..." 
@@ -68,12 +66,12 @@ const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) =
                         />
                         <Form.Control.Feedback type="invalid">O número de CNJ deve ter um formato válido.</Form.Control.Feedback>
                     </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button onClick={handleClose} disabled={adicionando}>Cancelar</Button>
-                    <Button type="submit" level="primary" disabled={adicionando}>{adicionando ? 'Adicionando...' : 'Adicionar'}</Button>
-                </Modal.Footer>
-            </Form>
+                </Form>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button onClick={handleClose} disabled={adicionando}>Cancelar</Button>
+                <Button type="submit" form="adicionarProcesso" level="primary" disabled={adicionando}>{adicionando ? 'Adicionando...' : 'Adicionar'}</Button>
+            </Modal.Footer>
         </Modal>
     )
 }

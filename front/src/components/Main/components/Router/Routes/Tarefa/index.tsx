@@ -78,7 +78,7 @@ const Tarefa: React.FC = () => {
                     // Tarefa é uma subtarefa
                     // Checar se não estamos na url de tarefas, e caso não, buscar a tarefa pai.
                     if(matchTarefaRoute !== null)
-                        return navigate(`/processos/${processoId}/tarefas/${tarefaData.tar_pai_id}/subtarefa/${tarefaId}`)
+                        return navigate(`/processos/${processoData.pro_cnj}/tarefas/${tarefaData.tar_pai_id}/subtarefa/${tarefaId}`)
                     
                     const { data: tarefaPaiData} = await api.get<ITarefa>(`/tarefa/${tarefaData.tar_pai_id}`)
                     setTarefaPai(tarefaPaiData)
@@ -99,7 +99,7 @@ const Tarefa: React.FC = () => {
         try{
             await api.delete(`tarefa/${tarefa.tar_id}`)
             addNotification('Tarefa excluída com sucesso.')
-            navigate(`/processos/${processoId}/tarefas`)
+            navigate(`/processos/${processo.pro_cnj}/tarefas`)
         }
         catch(error){
             showError('Erro ao excluir tarefa.')
@@ -110,7 +110,7 @@ const Tarefa: React.FC = () => {
         try{
             await api.delete(`tarefa/${tarefa.tar_id}`)
             addNotification('Subtarefa excluída com sucesso.')
-            navigate(`/processos/${processoId}/tarefas/${tarefa.tar_pai_id}`)
+            navigate(`/processos/${processo.pro_cnj}/tarefas/${tarefa.tar_pai_id}`)
         }
         catch(error){
             showError('Erro ao excluir subtarefa.')
@@ -177,7 +177,7 @@ const Tarefa: React.FC = () => {
         try{
             const novaTarefa = await adicionarSubtarefa({...subtarefa, tar_pai_id: tarefa.tar_id })
             addNotification('Subtarefa adicionada com sucesso.')
-            navigate(`/processos/${processo.pro_id}/tarefas/${tarefa.tar_id}/subtarefa/${novaTarefa.tar_id}`)
+            navigate(`/processos/${processo.pro_cnj}/tarefas/${tarefa.tar_id}/subtarefa/${novaTarefa.tar_id}`)
         }
         catch(erro: any){
             showError('Erro ao adicionar subtarefa.', erro as Error)
@@ -239,7 +239,7 @@ const Tarefa: React.FC = () => {
                     {isSubtarefa && 
                         <p>
                             <span>Pertence a tarefa: </span>
-                            <Link to={`/processos/${processoId}/tarefas/${tarefa.tar_pai_id}`} reloadDocument={false}>{tarefaPai.tar_objetivo}</Link>
+                            <Link to={`/processos/${processo.pro_cnj}/tarefas/${tarefa.tar_pai_id}`} reloadDocument={false}>{tarefaPai.tar_objetivo}</Link>
                         </p>
                     }
                 </Col>
@@ -260,7 +260,7 @@ const Tarefa: React.FC = () => {
                         </div>
                         <hr/>
                         { subtarefas.length > 0 ?
-                            <Ul>{subtarefas.map(sub => <Subtarefa key={v4()} tarefa={sub} processoId={processoId}/>)}</Ul> :
+                            <Ul>{subtarefas.map(sub => <Subtarefa key={v4()} tarefa={sub} processoId={processo.pro_cnj}/>)}</Ul> :
                             <>Nenhuma subtarefa.</>
                         }
                     </>
