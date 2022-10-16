@@ -139,7 +139,6 @@ const buscaAndamentosDiariosOficiais = async (processo: ModelProcesso, notify: b
             })
             return data
         }
-        // TODO: Inserir da ordem da data do andamento, vou considerar que a data está ordenada junto ao id
         // Salvar andamentos no BD
         const salvarAndamentos = async (retornoAndamentos: RetornoAndamentosDiariosOficiais) => {
             const { items } = retornoAndamentos
@@ -151,8 +150,7 @@ const buscaAndamentosDiariosOficiais = async (processo: ModelProcesso, notify: b
         const pagina1 = await buscarPagina(1)
         await salvarAndamentos(pagina1)
 
-        const { paginator: {per_page, total_pages, total} } = pagina1
-        const paginas = [pagina1]
+        const { paginator: { total_pages } } = pagina1
 
         for(let currentPage = 2; currentPage <= total_pages; currentPage++){ // 3
             const pagina = await buscarPagina(currentPage)

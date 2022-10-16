@@ -13,7 +13,7 @@ export const marcarComoLida = async (request: JWTRequest, response: Response) =>
 
     try { 
         const usu_id = getUserID(request)
-        if(!validator.isInt(request.params.not_id, { min: 1, allow_leading_zeroes: false}))
+        if(!validator.isInt(request.params.not_id, { min: 0, allow_leading_zeroes: false}))
             throw new Error('Parâmetros de requisição inválidos.')
         const not_id = parseInt(request.params.not_id)
         await NotificacaoController.marcarVista(usu_id, not_id)

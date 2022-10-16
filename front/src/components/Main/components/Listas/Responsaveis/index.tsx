@@ -54,11 +54,11 @@ const ListaResponsaveis: React.FC<Props> = ({ url, style }) => {
     const removeResponsavel = async (usu_id: number) => {
         try{
             await api.delete(`${url}/${usu_id}`)
-            const usuario = responsaveis.find(u => u.usu_id === usu_id)
-            if(!usuario) throw new Error('Usuário não encontrado.')
-            addNotification(`Responsável ${usuario.usu_tag} removido.`)
+            const usuario = responsaveis.findIndex(u => u.usu_id === usu_id)
+            if(usuario === -1) throw new Error('Usuário não encontrado.')
+            addNotification(`Responsável ${responsaveis[usuario].usu_tag} removido.`)
             setResponsaveis(r => {
-                r.splice(r.indexOf(usuario), 1)
+                r.splice(usuario, 1)
                 return r
             })
         }
@@ -79,7 +79,7 @@ const ListaResponsaveis: React.FC<Props> = ({ url, style }) => {
             <div className='d-flex justify-content-between align-items-center mb-3'>
                 {style === 'simplified' ?
                     <p style={{fontWeight: 'bold', marginBottom: '0'}}>Responsáveis</p> :
-                    <h3 style={{ marginBottom: '0px'}}>Reponsáveis</h3>
+                    <h3 style={{ marginBottom: '0px'}}>Responsáveis</h3>
                 }
                 <div className="d-flex flex-row">
                     <ButtonIcon title="Adicionar responsável." onClick={() => setShowModalAddResponsavel(true)}>

@@ -58,7 +58,6 @@ export const getAll = async () => {
 
 export const getAllAndamentoProcesso = async (pro_id: number, last_and_id: number = 0, greater: boolean = false): Promise<Andamento[]> => {
     let comparator = greater ? Op.gt : Op.lt
-    console.log(greater ? 'greater' : 'less')
     const andamentos = await modelAndamento.findAll({ 
         where:{
             pro_id,

@@ -24,10 +24,17 @@ const Notificador: React.FC = () => {
       // TODO: melhorar o endpoint, trazer só as notificacoes apos determinada data
       try{
         const { data } = await api.get<NotificacoesSistema[]>('usuario/notificacoes')
+        const getTime = (not_data_envio: string): number => {
+          return parseISO(not_data_envio).getTime()
+        }
         
         setNotificacoesSistema(notificacoes => {
           const filtrado = data.filter(({ not_id }) => notificacoes.find(({ not_id: id}) => id === not_id) === undefined)
-          return [...notificacoes, ...filtrado]
+          const novasNotificacoes = notificacoes.concat(filtrado)
+          novasNotificacoes.sort((a,b) => getTime(a.not_data_envio) - getTime(b.not_data_envio))
+
+          //console.log(novasNotificacoes)
+          return novasNotificacoes
         })
       }
       catch(erro){
@@ -47,6 +54,9 @@ const Notificador: React.FC = () => {
 
       notificacoesSistema.splice(not,1)
       setNotificacoesSistema([...notificacoesSistema])
+      //console.log('vista', not)
+      //console.log('nots', notificacoesSistema)
+
     }
     catch(error){
       showError('Erro ao marcar a notificação como lida.')

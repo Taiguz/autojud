@@ -20,6 +20,7 @@ const saltRounds = 12
 const segredo = getEnv('SECRET')
 const segredoVerificarEmail = getEnv('SECRET_VERIFY')
 const appHostname = getEnv("APP_HOSTNAME")
+const appName = getEnv("APP_NAME")
 
 // TODO: criaçao de usuarios administradores
 export const create = async (usuario: CreateUsuario): Promise<Usuario> => {
@@ -178,7 +179,32 @@ export const decodeToken = async (token: string, secret: string = segredo): Prom
 
 const sendVerificationEmail = async (createdUsuario: ModelUsuario) => {
     const token = await authenticateUser(createdUsuario, '2d', segredoVerificarEmail)
-    mail(createdUsuario.usu_email, 'Verificar conta', `acesse ${appHostname}/verify/${token}`)
+    const txt = `
+        <h1>Bem vindo, ${createdUsuario.usu_tag}!</h1>
+        <p>Para começar, verifique sua conta trocando a sua senha no link abaixo.</p>
+        <a href="${appHostname}/verify/${token}" target="_blank">
+        <button
+            style="
+            background-color: #b8b8b8;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            martin-top: 5px;
+            cursor: pointer;
+            "
+        >Verificar conta</button>
+        </a>
+        <p>Bom trabalho!</p>
+        <p>Equipe ${appName}.</p>
+    `
+    mail(createdUsuario.usu_email, 'Bem vindo! Verifique sua conta para começar!', txt)
+
 }
 
 export const changePassword = async (usu_id: number, senhaAntiga: string, senhaNova: string): Promise<void> => {

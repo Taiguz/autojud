@@ -40,18 +40,18 @@ if(!isProductionEnv())
   app.use(cors())
 
   
-  app.use('/api/processo', processoRouter);
-  app.use('/api/andamento', andamentoRouter);
-  app.use('/api/usuario', usuarioRouter);
-  app.use('/api/tarefa', tarefaRouter)
-  app.use('/api/notificacao', notificacaoRouter)
-  app.use('/api/', rootRouter);
+app.use('/api/processo', processoRouter);
+app.use('/api/andamento', andamentoRouter);
+app.use('/api/usuario', usuarioRouter);
+app.use('/api/tarefa', tarefaRouter)
+app.use('/api/notificacao', notificacaoRouter)
+app.use('/api/', rootRouter);
 
-  app.use(express.static(path.join(__dirname, '..', 'front', 'build')));
+app.use(express.static(path.join(__dirname, '..', 'front', 'build')));
 
-  app.get('/*', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
-  });
+app.get('/*', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
+});
 
 
 const normalizePort = (val: string) => {
@@ -124,7 +124,6 @@ process.on('SIGTERM', gracefullShutdown)
 process.on('SIGINT', gracefullShutdown)
 
 //buscarTarefasEmVencimento()
-
 //buscaPeriodicaAndamentos()
 
 // Utilização do Heroku Scheduller

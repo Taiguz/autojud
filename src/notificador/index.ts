@@ -7,6 +7,7 @@ import logger from "../utils/logger";
 import { getEnv } from "../utils/utils";
 
 const appName = getEnv('APP_NAME')
+const appHostName = getEnv('APP_HOSTNAME')
 
 // TODO: Refatorar isso aqui, ficou ruim. Seria legal ter um template pronto de email que só recebesse os valores.
 export const notificarAndamentosResponsaveis = async (processo: Processo, andamentos: Andamento[], usuarios: Usuario[]) => {
@@ -22,10 +23,15 @@ export const notificarAndamentosResponsaveis = async (processo: Processo, andame
     usuarios.forEach(({ usu_tag, usu_email, usu_id }) => {
         console.log(`Enviando andamentos para ${usu_email}`)
 
-        let text = `<h1>Olá ${usu_tag}, você tem novos andamentos para o processo ${processo.pro_titulo}.</h1>`
+        let text = `<h1>Olá ${usu_tag}, você tem novos andamentos para o processo <a href="${appHostName}/processos/${processo.pro_cnj}" target="_blank">${processo.pro_titulo}</a>.</h1>`
         text += '<hr>'
         andamentos.forEach(({ and_data, and_descricao, and_id }) => {
-            text += `<p style="margin-bottom: 5px;">${format(parseISO(and_data), 'dd/MM/yyyy')} ${and_descricao}<p>`
+            text += `
+                <a href="${appHostName}/processos/${processo.pro_cnj}/andamentos/${and_id}" target="_blank">
+                <p style="margin-bottom: 5px;">
+                    ${format(parseISO(and_data), 'dd/MM/yyyy')} ${and_descricao}
+                <p>
+                </a>`
 
             notificacoes.push({ 
                 not_data_envio: dateToISOSTring(hoje),
@@ -76,7 +82,13 @@ export const notificarTarefasResponsaveis = async (responsavel: Usuario, tarefas
             usu_id 
         })
 
-        text += `<p style="margin-bottom: 5px;">Processo: ${processo.pro_titulo} Tarefa: ${tar_objetivo} <span style="font-weight: bold;">Vence ${diferencaDias} ${format(tarefaTermino, 'dd/MM/yyyy')}</span> <p>`
+        text += `<p style="margin-bottom: 5px;">
+            Processo: <a href="${appHostName}/processos/${processo.pro_cnj}" target="_blank">${processo.pro_titulo}</a> 
+            Tarefa: <a href="${appHostName}/processos/${processo.pro_cnj}/tarefas/${tar_id}" target="_blank">${tar_objetivo}</a> 
+            <span style="font-weight: bold;">
+                Vence ${diferencaDias} ${format(tarefaTermino, 'dd/MM/yyyy')}
+            </span>
+            <p>`
     })
     text += '<hr>'
     text += '<p>Bom trabalho!</p>'
