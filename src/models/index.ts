@@ -12,10 +12,10 @@ import { modelUsuario } from './usuarioModel'
 import { modelTarefa } from './tarefaModel'
 import { modelProcessoResponsavel } from './responsavelProcessoModel'
 import { modelTarefaResponsavel } from './responsavelTarefaModel'
+import { modelNotificacao } from './notificacaoModel'
 
 // Relacionamentos
-
-modelProcesso.hasMany(modelAndamento, { foreignKey: 'pro_id', as: 'andamentos'}),
+modelProcesso.hasMany(modelAndamento, { foreignKey: 'pro_id', as: 'andamentos'})
 
 modelProcesso.hasMany(modelTarefa, { foreignKey: 'pro_id', as: 'tarefas'})
 
@@ -31,4 +31,12 @@ modelTarefa.belongsToMany(modelUsuario, { through: modelTarefaResponsavel, forei
 
 modelUsuario.belongsToMany(modelTarefa, { through: modelTarefaResponsavel, foreignKey: 'tar_id' })
 
-export {modelOptions, modelUsuario, modelProcesso, modelAndamento, modelProcessoResponsavel, modelTarefaResponsavel}
+modelNotificacao.belongsTo(modelProcesso, { foreignKey: 'pro_id', as: 'processo' })
+
+modelNotificacao.belongsTo(modelTarefa , { foreignKey: 'tar_id', as: 'tarefa' })
+
+modelNotificacao.belongsTo(modelAndamento , { foreignKey: 'and_id', as: 'andamento' })
+
+modelNotificacao.belongsTo(modelUsuario, { foreignKey: 'usu_id', as: 'usuario' })
+
+export {modelOptions, modelUsuario, modelProcesso, modelAndamento, modelTarefa, modelProcessoResponsavel, modelTarefaResponsavel, modelNotificacao}

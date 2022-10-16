@@ -1,24 +1,26 @@
-import { modelProcessoResponsavel, modelUsuario } from '../models'
+import { modelProcessoResponsavel, modelTarefaResponsavel, modelUsuario } from '../models'
 import { ModelUsuario } from '../models/types'
 import { getEnv, sanitizeObject } from '../utils/utils'
-import { CreateUsuario, Processo, Usuario } from './types'
+import { CreateUsuario, EditarUsuario, Processo, Tarefa, Usuario } from './types'
 import bcrypt from 'bcrypt'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import logger from '../utils/logger'
 import { AuthError, AuthErrorUnVerifiedAccount, CustomValidatorError } from '../utils/erros'
 import validator from 'validator'
 import { mail } from '../mail'
-import { ProcessoController } from '.'
+import { ProcessoController, TarefaController } from '.'
 
 
 // All functions here are expected to throw erros
 //  should ne handled by the caller
-const attributes = ['usu_id', 'usu_tag', 'usu_email']
+const attributes = ['usu_id', 'usu_tag', 'usu_email', 'usu_oab', 'usu_verificado', 'usu_administrador'] // TODO: Limitar as informações que usuários normais tem acesso
+const attributesExtended = ['usu_id', 'usu_tag', 'usu_email', 'usu_oab', 'usu_administrador', 'usu_verificado']
 const saltRounds = 12
 
 const segredo = getEnv('SECRET')
 const segredoVerificarEmail = getEnv('SECRET_VERIFY')
 const appHostname = getEnv("APP_HOSTNAME")
+const appName = getEnv("APP_NAME")
 
 // TODO: criaçao de usuarios administradores
 export const create = async (usuario: CreateUsuario): Promise<Usuario> => {
@@ -30,7 +32,7 @@ export const create = async (usuario: CreateUsuario): Promise<Usuario> => {
         throw new CustomValidatorError('A senha do usuário não pode ser vazia.')
     else if(!validator.isLength(usu_senha, { min:8, max:20 }))
         throw new CustomValidatorError('A senha do usuário deve conter de 8 a 20 caracteres.')
-    else if (!validator.isStrongPassword(usu_senha, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1}))
+    else if (!validator.isStrongPassword(usu_senha, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false}))
         throw new CustomValidatorError('A senha do usuário não possui o formato adequado.')
     const senha = await getHashedPassword(usuario.usu_senha)
     const novoUsuario = {...usuario, usu_senha: senha, usu_verificado: false}
@@ -42,6 +44,22 @@ export const create = async (usuario: CreateUsuario): Promise<Usuario> => {
 // Can return undefined if not found
 export const get = async (usu_id: number): Promise<Usuario | null> => {
     const usuario = await modelUsuario.findByPk(usu_id, { attributes })
+    return usuario ? usuario.get() : null
+}
+
+export const getExtended = async (usu_id: number): Promise<Usuario | null> => {
+    const usuario = await modelUsuario.findByPk(usu_id, { attributes: attributesExtended })
+    return usuario ? usuario.get() : null
+}
+
+
+export const getByTag = async (usu_tag: string): Promise<Usuario | null> => {
+    const usuario = await modelUsuario.findOne({ where: { usu_tag }, attributes })
+    return usuario ? usuario.get() : null
+}
+
+export const getByTagExtended = async (usu_tag: string): Promise<Usuario | null> => {
+    const usuario = await modelUsuario.findOne({ where: { usu_tag }, attributes: attributesExtended })
     return usuario ? usuario.get() : null
 }
 
@@ -64,19 +82,28 @@ export const getAllProcessosSobreResponsabilidade = async (usu_id: number): Prom
     return processos
 }
 
+export const getAllTarefasSobreResponsabilidade = async (usu_id: number): Promise<Tarefa[]> => {
+    const responsaveis = await modelTarefaResponsavel.findAll({ where: { usu_id } })
+    const tarefaResponsabilidade = responsaveis.map(({ tar_id }) => tar_id)
+    const tarefas = await TarefaController.getTarefas(tarefaResponsabilidade)
+    for(const tarefa of tarefas)
+        tarefa.processo = await ProcessoController.get(tarefa.pro_id)
+    return tarefas
+}
+
 const getInstanceByEmail = async (usu_email: string): Promise<ModelUsuario | null> => {
     const usuario = await modelUsuario.findOne({ where: { usu_email }})
     return usuario
 }
 
-export const update = async (usuario: Usuario) => {
+export const update = async (usuario: EditarUsuario) => {
     const { usu_id, usu_senha } = usuario
-    if(usu_senha){
+    if(usu_senha && usuario.usu_senha){ // satisfy typescript
         if(validator.isEmpty(usu_senha))
             throw new CustomValidatorError('O campo senha não pode ser vazio.')
         else if(!validator.isLength(usu_senha, { min:8, max:20 }))
             throw new CustomValidatorError('O campo senha deve conter de 8 a 20 caracteres.')
-        else if (!validator.isStrongPassword(usu_senha, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1}))
+        else if (!validator.isStrongPassword(usu_senha, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false}))
             throw new CustomValidatorError('O campo senha não possui o formato adequado.')
         const senha = await getHashedPassword(usuario.usu_senha)
         usuario.usu_senha = senha
@@ -152,7 +179,32 @@ export const decodeToken = async (token: string, secret: string = segredo): Prom
 
 const sendVerificationEmail = async (createdUsuario: ModelUsuario) => {
     const token = await authenticateUser(createdUsuario, '2d', segredoVerificarEmail)
-    mail(createdUsuario.usu_email, 'Verificar conta', `acesse ${appHostname}/usuario/verify/${token}`)
+    const txt = `
+        <h1>Bem vindo, ${createdUsuario.usu_tag}!</h1>
+        <p>Para começar, verifique sua conta trocando a sua senha no link abaixo.</p>
+        <a href="${appHostname}/verify/${token}" target="_blank">
+        <button
+            style="
+            background-color: #b8b8b8;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            martin-top: 5px;
+            cursor: pointer;
+            "
+        >Verificar conta</button>
+        </a>
+        <p>Bom trabalho!</p>
+        <p>Equipe ${appName}.</p>
+    `
+    mail(createdUsuario.usu_email, 'Bem vindo! Verifique sua conta para começar!', txt)
+
 }
 
 export const changePassword = async (usu_id: number, senhaAntiga: string, senhaNova: string): Promise<void> => {
@@ -161,7 +213,7 @@ export const changePassword = async (usu_id: number, senhaAntiga: string, senhaN
     const isPasswordValid = await bcrypt.compare(senhaAntiga, usuario.usu_senha)
 
     if(!isPasswordValid)
-        throw new AuthError('Senha inváldia.')
+        throw new AuthError('Senha inválida.')
 
     const novaSenhaHashed = await getHashedPassword(senhaNova)
 

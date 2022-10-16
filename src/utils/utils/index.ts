@@ -1,4 +1,5 @@
 import { Request } from "express-jwt"
+import { Andamento, CreateAndamento } from "../../controlers/types"
 import logger from "../logger"
 
 export const sanitizeObject = (ob: any, attributes: string[], include: boolean = true) => {
@@ -31,8 +32,8 @@ export const assertOb = (ob: any, attributes: any): boolean => {
 export const getEnv = (prop: string): string => {
     const env = process.env[prop]
     if(env === undefined){
-        logger.error(`${env} deve ser definido. Saindo...`)
-        console.log(`${env} deve ser definido.`)
+        logger.error(`${prop} deve ser definido. Saindo...`)
+        console.log(`${prop} deve ser definido.`)
         process.exit(-1)
     }
     else 
@@ -50,4 +51,8 @@ export const getUserID = (request: Request): number => {
     if(usu_id === undefined)
         throw new Error("Sem autorização.")
     return usu_id
+}
+
+export const sanitizeAndamento = (andamento: Andamento | CreateAndamento) => {
+    andamento.and_descricao = andamento.and_descricao.replaceAll(/<[^><]+>/g, '')
 }

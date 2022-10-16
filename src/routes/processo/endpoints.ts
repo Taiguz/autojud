@@ -1,10 +1,11 @@
 
 import { AndamentoController, ProcessoController, TarefaController } from './../../controlers'
 import { Request, Response } from "express"
-import { httpCodes } from '../../utils/constants'
+import { defaultPageLimit, httpCodes } from '../../utils/constants'
 import logger from '../../utils/logger'
 import validator from 'validator'
 import { ValidationError } from 'sequelize'
+import { Andamento, Processo } from '../../controlers/types'
 
 export const createProcesso = async (request: Request, response: Response) => {
     const  processo = request.body
@@ -61,11 +62,17 @@ export const atualizarProcesso = async (request: Request, response: Response) =>
 }
 
 export const getProcesso = async (request: Request, response: Response) => {
+    let processo: Processo | null = null 
     try {
-        if(!validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}))
-                throw new Error('Parâmetros de requisição inválidos.')
-        const pro_id = parseInt(request.params.pro_id)
-        const processo = await ProcessoController.get(pro_id)
+        if(validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false})){
+            const pro_id = parseInt(request.params.pro_id)
+            processo = await ProcessoController.get(pro_id)
+        }
+        //TODO: validar se isso funciona
+        else if(validator.matches(request.params.pro_id, /[0-9-.]{1,20}/)){
+            const pro_cnj = request.params.pro_id
+            processo = await ProcessoController.getByCNJ(pro_cnj)
+        }
         if (processo !== null)
             response.status(httpCodes.OK).json(processo)
         else
@@ -80,16 +87,19 @@ export const getProcesso = async (request: Request, response: Response) => {
 export const getAndamentos = async (request: Request, response: Response) => {
     try {
         if(!validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}) ||
-        !validator.isInt(request.params.start_and_id, { min: 0, allow_leading_zeroes: false}))
+        !validator.isInt(request.params.start_and_id, { allow_leading_zeroes: false}))
             throw new Error('Parâmetros de requisição inválidos.')
         const pro_id = parseInt(request.params.pro_id)
         const start_and_id = parseInt(request.params.start_and_id)
-        const processo = await ProcessoController.getAllAndamentos(pro_id, start_and_id)
-        response.status(httpCodes.OK).json(processo)
+        // start_and_id negativo - pagina anterior
+        // start_and_id positivo - pagina sequinte
+        const andamentos = await ProcessoController.getAllAndamentos(pro_id, Math.abs(start_and_id), start_and_id > 0)
+        const total = await AndamentoController.countAndamentosProcesso(pro_id)
+        response.status(httpCodes.OK).json({ andamentos, total, page: defaultPageLimit})
     }
     catch(error){
         logger.error('Erro ao retornar processo.', error)
-        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar processo.'})
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar andamentos.'})
     }
 }
 
@@ -125,11 +135,11 @@ export const addResponsavelProcesso = async (request: Request, response: Respons
 
 export const removeResponsavelProcesso = async (request: Request, response: Response) => {
     try {
-        const { usu_id } = request.body
-        if(!validator.isInt(usu_id + '', { min: 1, allow_leading_zeroes: false}) ||
+        if(!validator.isInt(request.params.usu_id + '', { min: 1, allow_leading_zeroes: false}) ||
         !validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}))
             throw new Error('Parâmetros de requisição inválidos.')
         const pro_id = parseInt(request.params.pro_id)
+        const usu_id = parseInt(request.params.usu_id)
         await ProcessoController.removeResponsavel(usu_id, pro_id)
         response.status(httpCodes.OK).json({ message: 'Responsável removido.'})
     }

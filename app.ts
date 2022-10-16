@@ -1,5 +1,6 @@
 require('dotenv').config()
 import http from 'http'
+import cors from 'cors'
 import Logger from './src/utils/logger'
 import { dataHoje } from './src/utils/dataUtils'
 import database from './src/database'
@@ -7,10 +8,12 @@ import processoRouter from './src/routes/processo'
 import rootRouter from './src/routes/root'
 import usuarioRouter from './src/routes/usuario'
 import tarefaRouter from './src/routes/tarefa'
-import { CronJob } from 'cron'
-import { cronBuscarAndamentos, cronBuscarTarefasVencimento } from './src/utils/constants'
+import andamentoRouter from './src/routes/andamento'
+import notificacaoRouter from './src/routes/notificacao'
+import { isProductionEnv } from './src/utils/utils'
 import { buscarTarefasEmVencimento } from './src/notificador/notificadorTarefas'
 import { buscaPeriodicaAndamentos } from './src/buscador'
+import { Request, Response } from 'express'
 
 const debug = require('debug')('autojud:server');
 const rfs = require("rotating-file-stream");
@@ -32,12 +35,23 @@ app.use(logger('dev', { stream })); //  Requests logs
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/processo', processoRouter);
-app.use('/usuario', usuarioRouter);
-app.use('/tarefa', tarefaRouter)
-app.use('/', rootRouter);
+if(!isProductionEnv())
+  app.use(cors())
+
+  
+app.use('/api/processo', processoRouter);
+app.use('/api/andamento', andamentoRouter);
+app.use('/api/usuario', usuarioRouter);
+app.use('/api/tarefa', tarefaRouter)
+app.use('/api/notificacao', notificacaoRouter)
+app.use('/api/', rootRouter);
+
+app.use(express.static(path.join(__dirname, '..', 'front', 'build')));
+
+app.get('/*', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
+});
 
 
 const normalizePort = (val: string) => {
@@ -49,7 +63,7 @@ const normalizePort = (val: string) => {
   return false;
 }
 
-const port = normalizePort(process.env.SERVER_PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000');
 
 const onError = (error: { syscall: string; code: any; }) => {
   Logger.error('Server error.', error)
@@ -86,6 +100,7 @@ const onListening = () => {
     : 'port ' + addr?.port;
   Logger.info(`Server online on ${bind}!.`)
   debug('Server online on ' + bind);
+  console.log(`Servidor online! Rodando em ${process.env.PORT}.`)
 }
 
 // TODO enhance the gracefull shutdown?
@@ -108,7 +123,11 @@ server.on('listening', onListening);
 process.on('SIGTERM', gracefullShutdown)
 process.on('SIGINT', gracefullShutdown)
 
-new CronJob(cronBuscarTarefasVencimento, buscarTarefasEmVencimento, null, true);
-new CronJob(cronBuscarAndamentos, buscaPeriodicaAndamentos, null, true);
+//buscarTarefasEmVencimento()
+//buscaPeriodicaAndamentos()
+
+// Utilização do Heroku Scheduller
+//new CronJob(cronBuscarTarefasVencimento, buscarTarefasEmVencimento, null, true);
+//new CronJob(cronBuscarAndamentos, buscaPeriodicaAndamentos, null, true);
 
 module.exports = app;

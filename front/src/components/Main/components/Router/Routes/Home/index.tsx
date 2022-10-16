@@ -3,11 +3,11 @@ import { MainContext } from '../../../..'
 
 const Home: React.FC = () => {
 
-    const { setBreadCumb } = useContext(MainContext)
+    const { setBreadCrumb } = useContext(MainContext)
 
     useEffect(() => {
-        setBreadCumb([{ name: 'Home', path: '/' }])
-    }, [setBreadCumb])
+        setBreadCrumb([])
+    }, [setBreadCrumb])
     
 
     return <h1>Dashboard</h1>

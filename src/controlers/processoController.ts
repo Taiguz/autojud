@@ -16,17 +16,24 @@ const attributes = ['pro_id', 'pro_cnj', 'pro_titulo']
 
 const andamentosPorPagina = 25
 
-// TODO: validar processo antes de cadastrar
 export const create = async (processo: CreateProcesso): Promise<Processo> => {
     const createdProcesso = await modelProcesso.create(processo)
     buscarAndamentos(createdProcesso, false)
     return sanitizeObject(createdProcesso.get(), attributes)
 }
 
-// Can return undefined if not found
-export const get = async (pro_id: number): Promise<Processo | null> => {
+export const get = async (pro_id: number): Promise<Processo> => {
     const processo = await modelProcesso.findByPk(pro_id, { attributes })
-    return processo ? processo.get() : null
+    if(processo === null)
+        throw new Error('Processo não existe.')
+    return processo.get()
+}
+
+export const getByCNJ = async (pro_cnj: string): Promise<Processo> => {
+    const processo = await modelProcesso.findOne({ where: { pro_cnj },  attributes })
+    if(processo === null)
+        throw new Error('Processo não existe')
+    return processo 
 }
 
 export const getProcessos = async (pro_id: number[]): Promise<Processo[]> => {
@@ -67,8 +74,8 @@ export const getAllInstances = async (): Promise<ModelProcesso[]> => {
     return processos
 }
 
-export const getAllAndamentos = async (pro_id: number, last_and_id: number = 0): Promise<Andamento[]> => {
-    const andamentos = await AndamentoController.getAllAndamentoProcesso(pro_id, last_and_id)
+export const getAllAndamentos = async (pro_id: number, last_and_id: number = 0, greater: boolean = true): Promise<Andamento[]> => {
+    const andamentos = await AndamentoController.getAllAndamentoProcesso(pro_id, last_and_id, greater)
     return andamentos
 }
 
@@ -94,18 +101,18 @@ export const saveNewAndamentos = async (pro_id: number, andamentos: CreateAndame
 
     let andamentosFiltrados = [...andamentos]
     const { pro_ultimo_andamento } = processo
-    if(pro_ultimo_andamento !== null && pro_ultimo_andamento !== undefined) 
-        andamentosFiltrados = andamentosFiltrados.filter(({ and_data }) => parseISO(and_data) > parseISO(pro_ultimo_andamento) )
+
+    if(pro_ultimo_andamento){
+        const dataUltimoAndamento = parseISO(pro_ultimo_andamento)
+        andamentosFiltrados = andamentosFiltrados.filter(({ and_data }) => parseISO(and_data) > dataUltimoAndamento )
+    }
 
     andamentosFiltrados = andamentosFiltrados.sort((a,b) => parseISO(a.and_data).getTime() - parseISO(b.and_data).getTime())
 
-    const novosAndamentos = await modelAndamento.bulkCreate(andamentosFiltrados)
-    // TODO: Notificar notificáveis
-    // notificar(novosAndamentos)
+    const novosAndamentos = await AndamentoController.createBulk(andamentosFiltrados)
 
-    return novosAndamentos.map(andamento => andamento.get())
+    return novosAndamentos
 }
-
 
 export const salvarDataUltimoAndamento = async (pro_id: number) => {
     const processo = await getInstance(pro_id)

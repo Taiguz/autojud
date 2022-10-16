@@ -49,3 +49,15 @@ export interface ModelTarefaResponsavel extends Model<InferAttributes<ModelTaref
     usu_id: number
     tar_id: number
 }
+
+export interface ModelNotificacao extends Model<InferAttributes<ModelNotificacao>, InferCreationAttributes<ModelNotificacao>> {
+    not_id: CreationOptional<number>
+    not_aviso: string
+    not_data_envio: string
+    not_visto: boolean
+    not_importancia: number
+    pro_id: number
+    usu_id: number
+    tar_id?: number
+    and_id?: number
+}

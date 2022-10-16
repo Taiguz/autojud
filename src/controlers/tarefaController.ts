@@ -1,6 +1,6 @@
 import { sanitizeObject } from '../utils/utils'
 import { CreateTarefa, Tarefa, Usuario } from './types'
-import { modelTarefa } from '../models/tarefaModel'
+import { modelTarefa } from '../models'
 import { UsuarioController } from '.'
 import { modelProcesso, modelTarefaResponsavel } from '../models'
 import { Op } from 'sequelize'
@@ -17,6 +17,8 @@ export const attributes = [
     'tar_data_cadastro',
     'tar_data_termino',
     'tar_situacao',
+    'tar_pai_id',
+    'pro_id'
 ]
 
 // Todos os campos enviados ao controller devem ser sanitizados pelo caller
@@ -42,6 +44,11 @@ export const getInstance = async (tar_id: number) => {
     if(tarefa === null)
         throw new Error('Tarefa não existe.')
     return tarefa
+}
+
+export const getTarefas = async (tar_id: number[]): Promise<Tarefa[]> => {
+    const tarefas = await modelTarefa.findAll({ where: { tar_id }, attributes})
+    return tarefas.map(tarefa => tarefa.get())
 }
 
 export const createSubtarefa = async (tarefa: Tarefa) => {
@@ -109,7 +116,6 @@ export const getAllParaVencimentoParaResponsaveis = async (): Promise<Responsave
             responsaveis[usu_id].tarefas.push(tarefa.get())
         })
     })
-    debugger
 
     return responsaveis
 }
