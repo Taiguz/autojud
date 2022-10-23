@@ -14,8 +14,10 @@ router.post('/:tar_id', TarefaEndpoints.createSubtarefa)
 router.get('/:tar_id/subtarefas', TarefaEndpoints.getAllSubtarefas)
 router.delete('/:tar_id', TarefaEndpoints.deletarTarefa)
 router.put('/', TarefaEndpoints.atualizarTarefa)
+
+// Responsaveis
 router.get('/:tar_id/responsavel', TarefaEndpoints.getResponsaveis)
 router.post('/:tar_id/responsavel', TarefaEndpoints.addResponsavel)
-router.delete('/:tar_id/responsavel/:usu_id', TarefaEndpoints.removeResponsavel)
+router.delete('/:tar_id/responsavel/:usu_tag', TarefaEndpoints.removeResponsavel)
 
 export default router

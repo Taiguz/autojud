@@ -6,7 +6,7 @@ import { NotificacaoController, UsuarioController } from "../../controlers"
 import { Usuario } from "../../controlers/types"
 import { decodeToken } from "../../controlers/usuarioController"
 import { httpCodes } from '../../utils/constants'
-import { AuthError, AuthErrorUnVerifiedAccount, CustomValidatorError } from "../../utils/erros"
+import { AuthError, AuthErrorUnVerifiedAccount, AuthorizeError, CustomValidatorError } from "../../utils/erros"
 import logger from '../../utils/logger'
 import { getEmailTag, getEnv, getUserID } from "../../utils/utils"
 
@@ -42,9 +42,26 @@ export const createUsuario = async (request: Request, response: Response) => {
     }
 }
 
-export const getAllUsuario = async (request: Request, response: Response) => {
+export const getAllUsuario = async (request: JWTRequest, response: Response) => {
     try {
         const usuarios = await UsuarioController.getAll()
+        const usu_id = request.auth?.usu_id
+        if(usu_id === undefined) throw new Error('Sem autorização.')
+        const isAdmin = await UsuarioController.isAdmin(usu_id)
+        if(isAdmin)
+            response.status(httpCodes.OK).json(usuarios)
+        else
+            response.status(httpCodes.OK).json(usuarios.map(({ usu_tag }) => ({ usu_tag })))
+    }
+    catch(error){
+        logger.error('Erro ao retornar usuario.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar usuario.'})
+    }
+}
+
+export const getAllUsuariosTags = async (request: Request, response: Response) => {
+    try {
+        const usuarios = await UsuarioController.getAllTags()
         response.status(httpCodes.OK).json(usuarios)
     }
     catch(error){
@@ -107,7 +124,7 @@ export const getCurrentUsuario = async (request: Request, response: Response) =>
     }
 }
 
-export const getUsuario = async (request: Request, response: Response) => {
+export const getUsuario = async (request: JWTRequest, response: Response) => {
     try {
         let isUsuId = false
         if(validator.isInt(request.params.usu_id, { min: 1, allow_leading_zeroes: false}))
@@ -115,6 +132,16 @@ export const getUsuario = async (request: Request, response: Response) => {
         if(!isUsuId && !validator.isAlphanumeric(request.params.usu_id) && !validator.isLength(request.params.usu_id, { min: 4, max: 20}))
             throw new Error('Tag de usuário inválida.')
 
+        const usu_id = request.auth?.usu_id
+        if(usu_id === undefined) throw new Error('Sem autorização.')
+        const isAdmin = await UsuarioController.isAdmin(usu_id)
+        if(isUsuId && usu_id !== parseInt(request.params.usu_id) && !isAdmin)
+            throw new AuthorizeError('Sem autorização.')
+        else if(!isUsuId){
+            const { usu_tag } = await UsuarioController.getInstance(usu_id)
+            if(usu_tag !== request.params.usu_id && !isAdmin)
+                throw new AuthorizeError('Sem autorização.')
+        }
     
         let usuario: Usuario | null
         if(isUsuId)
@@ -130,7 +157,10 @@ export const getUsuario = async (request: Request, response: Response) => {
     }
     catch(error){
         logger.error('Erro ao retornar usuário.', error)
-        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar usuário.'})
+        if(error instanceof AuthorizeError)
+            response.status(httpCodes.UNAUTHORIZED).json({ message: 'Sem permissões necessárias.'})
+        else
+            response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar usuário.'})
     }
 }
 
@@ -148,6 +178,21 @@ export const verificarUsuarioTrocarSenha = async (request: Request, response: Re
     catch(error){
         logger.error('Erro ao verificar usuário.', error)
         response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao verificar usuário.'})
+    }
+}
+
+export const alterarSenha = async (request: JWTRequest, response: Response) => {
+    try {
+        const { senha_atual, nova_senha } = request.body
+        if(!validator.isStrongPassword(nova_senha, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false}))
+            throw new Error('Parâmetros de requisição inválidos.')
+        const usu_id = getUserID(request)
+        await UsuarioController.changePassword(usu_id, senha_atual, nova_senha)
+        response.status(httpCodes.OK).json({ message: 'Sua senha foi alterada com sucesso.'})
+    }
+    catch(error){
+        logger.error('Erro ao alterar senha.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao alterar senha. Verifique se a senha informada está correta.'})
     }
 }
 
@@ -255,6 +300,6 @@ export const sameUser = async (request: JWTRequest, response: Response, next: Ne
     }
     catch(error){
         logger.error('Erro checando permissões.', error)
-        response.status(httpCodes.INTERNAL_ERROR).json({ message: 'Erro checando permissões.'})
+        response.status(httpCodes.UNAUTHORIZED).json({ message: 'Erro checando permissões.'})
     }
 }

@@ -9,6 +9,7 @@ export interface ModelProcesso extends Model<InferAttributes<ModelProcesso>, Inf
     pro_titulo: string
     pro_ultimo_andamento?: string
     pro_external_id?: number
+    pro_situacao?: number
 }
 
 export interface ModelAndamento extends Model<InferAttributes<ModelAndamento>, InferCreationAttributes<ModelAndamento>> {

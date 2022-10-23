@@ -13,19 +13,24 @@ const quantidadeItens = 2
 
 // Paginas comecam em 0 
 const Paginacao: React.FC<Props> = ({ totalItens, paginaAtual, itensPorPagina, setPagina, disabled }) => {
+    console.log(totalItens, paginaAtual, itensPorPagina, disabled)
 
     const totalPaginas = Math.ceil(totalItens / itensPorPagina)
 
     let limiteInferior = paginaAtual - quantidadeItens
     let limiteSuperior = paginaAtual + quantidadeItens
 
-    if(limiteInferior < 1){
+    console.log(limiteInferior, limiteSuperior)
+
+    if(limiteInferior <= 0){
         limiteSuperior += Math.abs(limiteInferior)
         limiteInferior = 1;
     }
 
     if(limiteSuperior > totalPaginas) {
         limiteInferior -= limiteSuperior - totalPaginas
+        if(limiteInferior <= 0)
+            limiteInferior = 1
         limiteSuperior = totalPaginas
     }
 
@@ -33,6 +38,9 @@ const Paginacao: React.FC<Props> = ({ totalItens, paginaAtual, itensPorPagina, s
 
     for(let index = limiteInferior; index <= limiteSuperior; index++)
         paginas.push(index)
+
+    if(totalItens === itensPorPagina)
+        return <></>
 
     return (
         <Pagination className="d-flex justify-content-end">

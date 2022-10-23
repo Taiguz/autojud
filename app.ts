@@ -16,13 +16,6 @@ import { buscaPeriodicaAndamentos } from './src/buscador'
 import { Request, Response } from 'express'
 
 const debug = require('debug')('autojud:server');
-const rfs = require("rotating-file-stream");
-
-const stream = rfs.createStream(`./logs/${dataHoje}-server-requests.log`, {
-  size: "10M", // rotate every 10 MegaBytes written
-  interval: "1d", // rotate daily
-  compress: "gzip" // compress rotated files
-});
 
 const express = require('express');
 const path = require('path');
@@ -30,7 +23,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const app = express();
 
-app.use(logger('dev', { stream })); //  Requests logs
+app.use(logger('dev')); //  Requests logs
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

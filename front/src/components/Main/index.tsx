@@ -7,11 +7,12 @@ import Router from './components/Router'
 import Login from './components/Login'
 import { BreadCrumb, CustomError as ICustomError, CustomMessage as ICustomMessage, MainContextType, Notificacao } from './types'
 import CustomMessage from './components/GenericMessage'
-import { Routes, Route } from 'react-router'
+import { Routes, Route, useLocation } from 'react-router'
 import VerificaoUsuario from './components/VerificaoUsuario'
 import { IUsuario } from './components/Router/Routes/Usuario/types'
 import api from '../../api'
 import Loader from './components/Loader'
+import ModalAlterarSenha from './components/Modais/ModalAlterarSenha'
 
 
 
@@ -55,6 +56,13 @@ export const useNotification = () => {
     },[setNotificacoes])
     return addNotificao
 }
+
+export const useQuery = () => {
+    const { search } = useLocation()
+  
+    return React.useMemo(() => new URLSearchParams(search), [search]);
+}
+
 
 
 const Main: React.FC = () => {

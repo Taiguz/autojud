@@ -11,7 +11,13 @@ const BreadCumb: React.FC = () => {
     return (
         <CustomBreadcrumb>
             {breadCrumb.map(({ name, path }: any, index: number) => ( 
-                <BreadcrumbItem key={v4()} active={index === breadCrumb.length - 1} linkAs={Link} linkProps={{ to: path }}>{name}</BreadcrumbItem>
+                <BreadcrumbItem 
+                    key={v4()}
+                    active={index === breadCrumb.length - 1}
+                    linkAs={Link}
+                    linkProps={{ to: path }}>
+                {name}
+                </BreadcrumbItem>
             ))}
         </CustomBreadcrumb>
     )

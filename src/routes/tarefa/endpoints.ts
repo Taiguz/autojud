@@ -89,30 +89,29 @@ export const getAllSubtarefas = async (request: Request, response: Response) => 
     }
 }
 
-export const addResponsavel= async (request: Request, response: Response) => {
+export const addResponsavel = async (request: Request, response: Response) => {
     try {
-        const { usu_id } = request.body
-        if(!validator.isInt(usu_id + '', { min: 1, allow_leading_zeroes: false}) ||
+        const { usu_tag } = request.body
+        if(!Array.isArray(usu_tag) || usu_tag.length === 0 || usu_tag.length > 20 ||
         !validator.isInt(request.params.tar_id, { min: 1, allow_leading_zeroes: false}))
             throw new Error('Parâmetros de requisição inválidos.')
         const tar_id = parseInt(request.params.tar_id)
-        await TarefaController.addResponsavel(usu_id, tar_id)
-        response.status(httpCodes.CREATED).json({ message: 'Responsável adicionado.'})
+        await TarefaController.addResponsaveisByTag(usu_tag, tar_id)
+        response.status(httpCodes.CREATED).json({ message: 'Responsáveis adicionados.'})
     }
     catch(error){
-        logger.error('Erro ao adicionar responsável.', error)
-        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao adicionar responsável.'})
+        logger.error('Erro ao adicionar responsáveis.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao adicionar responsáveis.'})
     }
 }
 
 export const removeResponsavel= async (request: Request, response: Response) => {
     try {
-        if(!validator.isInt(request.params.usu_id, { min: 1, allow_leading_zeroes: false}) ||
+        if(request.params.usu_tag.length === 0 ||
            !validator.isInt(request.params.tar_id, { min: 1, allow_leading_zeroes: false}))
             throw new Error('Parâmetros de requisição inválidos.')
         const tar_id = parseInt(request.params.tar_id)
-        const usu_id = parseInt(request.params.usu_id)
-        await TarefaController.removeResponsavel(usu_id, tar_id)
+        await TarefaController.removeResponsavelByTag(request.params.usu_tag, tar_id)
         response.status(httpCodes.OK).json({ message: 'Responsável removido.'})
     }
     catch(error){
@@ -127,7 +126,7 @@ export const getResponsaveis = async (request: Request, response: Response) => {
             throw new Error('Parâmetros de requisição inválidos.')
         const tar_id = parseInt(request.params.tar_id)
         const usuarios = await TarefaController.getAllReponsaveis(tar_id)
-        response.status(httpCodes.OK).json(usuarios)
+        response.status(httpCodes.OK).json(usuarios.map(({ usu_tag }) => ({ usu_tag })))
     }
     catch(error){
         logger.error('Erro ao retornar responsáveis.', error)

@@ -133,14 +133,29 @@ export const addResponsavelProcesso = async (request: Request, response: Respons
     }
 }
 
-export const removeResponsavelProcesso = async (request: Request, response: Response) => {
+export const addResponsaveisProcessoByTag = async (request: Request, response: Response) => {
     try {
-        if(!validator.isInt(request.params.usu_id + '', { min: 1, allow_leading_zeroes: false}) ||
-        !validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}))
+        const { usu_tag } = request.body
+        if(!Array.isArray(usu_tag) || usu_tag.length === 0 || usu_tag.length > 20 ||
+           !validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}))
             throw new Error('Parâmetros de requisição inválidos.')
         const pro_id = parseInt(request.params.pro_id)
-        const usu_id = parseInt(request.params.usu_id)
-        await ProcessoController.removeResponsavel(usu_id, pro_id)
+        await ProcessoController.addResponsaveisByTag(usu_tag, pro_id)
+        response.status(httpCodes.CREATED).json({ message: 'Responsáveis adicionados.'})
+    }
+    catch(error){
+        logger.error('Erro ao adicionar responsáveis.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao adicionar responsáveis.'})
+    }
+}
+
+export const removeResponsavelProcesso = async (request: Request, response: Response) => {
+    try {
+        if(request.params.usu_tag.length === 0 ||
+           !validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}))
+            throw new Error('Parâmetros de requisição inválidos.')
+        const pro_id = parseInt(request.params.pro_id)
+        await ProcessoController.removeResponsavelByTag(request.params.usu_tag, pro_id)
         response.status(httpCodes.OK).json({ message: 'Responsável removido.'})
     }
     catch(error){
@@ -155,7 +170,7 @@ export const getResponsaveis = async (request: Request, response: Response) => {
             throw new Error('Parâmetros de requisição inválidos.')
         const pro_id = parseInt(request.params.pro_id)
         const usuarios = await ProcessoController.getAllReponsaveis(pro_id)
-        response.status(httpCodes.OK).json(usuarios)
+        response.status(httpCodes.OK).json(usuarios.map(({ usu_tag }) => ({ usu_tag })))
     }
     catch(error){
         logger.error('Erro ao retornar responsáveis.', error)

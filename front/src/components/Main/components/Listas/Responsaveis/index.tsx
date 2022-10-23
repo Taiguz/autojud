@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { IUsuario } from '../../Router/Routes/Usuario/types'
+import { BasicUsuario, IUsuario } from '../../Router/Routes/Usuario/types'
 import { AiOutlineUser, AiOutlineUserAdd, AiOutlineDelete } from "react-icons/ai";
 import { Li, Ul } from './style';
 import ButtonIcon from '../../ButtonIcon';
@@ -7,6 +7,7 @@ import { useError, useNotification } from '../../..';
 import api from '../../../../../api';
 import Loader from '../../Loader';
 import ModalAdicionarResponsaveis from './ModalAdicionarResponsaveis';
+import { v4 } from 'uuid';
 
 interface Props {
     url: string
@@ -15,7 +16,7 @@ interface Props {
 
 const ListaResponsaveis: React.FC<Props> = ({ url, style }) => {
 
-    const [responsaveis, setResponsaveis] = useState<IUsuario[]>([])
+    const [responsaveis, setResponsaveis] = useState<BasicUsuario[]>([])
     const [carregando, setCarregando] = useState(true)
     const [showModalAddResponsavel, setShowModalAddResponsavel] = useState(false)
     const showError = useError()
@@ -24,7 +25,7 @@ const ListaResponsaveis: React.FC<Props> = ({ url, style }) => {
     useEffect(() => {
         const fetchResponsaveis = async () => {
             try{
-                const { data } = await api.get<IUsuario[]>(url)
+                const { data } = await api.get<BasicUsuario[]>(url)
                 setResponsaveis(data)
                 setCarregando(false)
             }
@@ -35,15 +36,17 @@ const ListaResponsaveis: React.FC<Props> = ({ url, style }) => {
         fetchResponsaveis()
     },[showError, url])
 
-    const addResponsavel = async (usu_id: number) => {
-        await api.post(url, { usu_id })
-    }
-    const addResponsaveis = async (usuarios: IUsuario[]) => {
+    const addResponsaveis = async (usu_tags: string) => {
         try {
+            const responsaveis = usu_tags.split(',').map(tag => tag.trim())
+            await api.post(url, { usu_tag: responsaveis })
             // TODO: fazer uma req única para adicionar em batch
-            for(let usuario of usuarios)
-                await addResponsavel(usuario.usu_id)
-            setResponsaveis(s => [...s, ...usuarios])
+            setResponsaveis(s => {
+                const r = responsaveis
+                    .map(tag => ({ usu_tag: tag }))
+                    .filter(novoUser => s.find(({ usu_tag }) => usu_tag === novoUser.usu_tag) === undefined)
+                return [...s, ...r]
+            })
             addNotification("Responsáveis adicionados com sucesso.")
         }
         catch(erro){
@@ -51,15 +54,16 @@ const ListaResponsaveis: React.FC<Props> = ({ url, style }) => {
         }
     }
 
-    const removeResponsavel = async (usu_id: number) => {
+    const removeResponsavel = async (usu_tag: string) => {
         try{
-            await api.delete(`${url}/${usu_id}`)
-            const usuario = responsaveis.findIndex(u => u.usu_id === usu_id)
+            await api.delete(`${url}/${usu_tag}`)
+            const usuario = responsaveis.findIndex(u => u.usu_tag === usu_tag)
             if(usuario === -1) throw new Error('Usuário não encontrado.')
             addNotification(`Responsável ${responsaveis[usuario].usu_tag} removido.`)
             setResponsaveis(r => {
-                r.splice(usuario, 1)
-                return r
+                const novosResponsaveis = [...r]
+                novosResponsaveis.splice(usuario, 1)
+                return novosResponsaveis
             })
         }
         catch(error){
@@ -91,13 +95,13 @@ const ListaResponsaveis: React.FC<Props> = ({ url, style }) => {
             {
                 responsaveis.length > 0 ?
                 <Ul>
-                    {responsaveis.map(({ usu_tag, usu_id }) => (
-                        <Li key={usu_id}>
+                    {responsaveis.map(({ usu_tag }) => (
+                        <Li key={v4()}>
                             <div>
                                 <AiOutlineUser style={{ marginRight: '10px', fontSize: '1.1rem'}}/>
                                 <span>{usu_tag}</span>
                             </div>
-                            <ButtonIcon title="Remover responsável." onClick={() => removeResponsavel(usu_id)}>
+                            <ButtonIcon title="Remover responsável." onClick={() => removeResponsavel(usu_tag)}>
                                 <AiOutlineDelete style={{ fontSize: '1.1rem'}}/>
                             </ButtonIcon>
                         </Li>

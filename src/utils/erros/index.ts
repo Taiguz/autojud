@@ -1,3 +1,10 @@
+export class AuthorizeError extends Error {
+  //TODO: Revisar isso aqui, qual o tipo de options?
+  constructor(message = "", options?: any) {
+    super(message);
+  }
+}
+
 export class AuthError extends Error {
     //TODO: Revisar isso aqui, qual o tipo de options?
     constructor(message = "", options?: any) {

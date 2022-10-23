@@ -126,7 +126,19 @@ export const addResponsavel = async (usu_id: number, tar_id: number) => {
     await modelTarefaResponsavel.create({ usu_id: usuario.usu_id, tar_id: tarefa.tar_id })
 }
 
+export const addResponsaveisByTag = async (usu_tag: string[], tar_id: number) => {
+    const usuarios = await UsuarioController.getInstancesByTag(usu_tag)
+    const tarefa = await getInstance(tar_id)
+    const responsaveis = usuarios.map(({ usu_id }) => ({ usu_id, tar_id: tarefa.tar_id }))
+    await modelTarefaResponsavel.bulkCreate(responsaveis, { ignoreDuplicates: true })
+}
+
 export const removeResponsavel = async (usu_id: number, tar_id: number) => {
+    await modelTarefaResponsavel.destroy({ where: { usu_id, tar_id }})
+}
+
+export const removeResponsavelByTag = async (usu_tag: string, tar_id: number) => {
+    const { usu_id } = await UsuarioController.getInstanceByTag(usu_tag)
     await modelTarefaResponsavel.destroy({ where: { usu_id, tar_id }})
 }
 

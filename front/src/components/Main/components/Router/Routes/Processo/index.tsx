@@ -4,7 +4,7 @@ import { MainContext, useError, useNotification } from '../../../..'
 import api from '../../../../../../api'
 import Loader from '../../../Loader'
 import { CustomContainer, Ul } from './style'
-import { IProcesso } from './types'
+import { IProcesso, ProcessoSituacao } from './types'
 import { Row, Col } from 'react-bootstrap'
 import { IAndamento } from '../Andamentos/types'
 import { IUsuario } from '../Usuario/types'
@@ -15,11 +15,13 @@ import { Link } from 'react-router-dom'
 import Responsavel from './components/Responsavel'
 import Tarefa from './components/Tarefa'
 import { AiOutlineFileExcel, AiOutlineUserAdd, AiOutlineForm, AiOutlinePlusCircle } from "react-icons/ai";
+import { BsFolderX, BsFolderCheck } from 'react-icons/bs'
 import ButtonIcon from '../../../ButtonIcon'
 import ModalEditarProcesso from './components/ModalEditarProcesso'
 import ListaResponsaveis from '../../../Listas/Responsaveis'
 import { adicionarTarefa } from '../Tarefas/utils'
 import ModalAdicionarTarefa from '../../../Modais/ModalAdicionarTarefa'
+import { getSituacao } from '../Processos/utils'
 const Processo: React.FC = () => {
 
     const navigate = useNavigate()
@@ -28,7 +30,7 @@ const Processo: React.FC = () => {
     const [showModalAdicionarTarefa, setShowModalAdicionarTarefa] = useState(false)
     const { processoId } = useParams()
     const [carregando, setCarregando] = useState(true)
-    const [processo, setProcesso] = useState<IProcesso>({pro_id: 0, pro_cnj: '', pro_titulo: ''})
+    const [processo, setProcesso] = useState<IProcesso>({pro_id: 0, pro_cnj: '', pro_titulo: '', pro_situacao: 0})
     const [andamentos, setAndamentos] = useState<IAndamento[]>([])
     const [tarefas, setTarefas] = useState<ITarefa[]>([])
     const showError = useError()
@@ -70,6 +72,18 @@ const Processo: React.FC = () => {
         }
         catch(erro: any){
             showError('Erro ao excluir processo.', erro)
+        }
+    }
+
+    const atualizarSituacao = async (pro_situacao: number) => {
+        try{
+            const { pro_id } = processo
+            await api.put(`/processo`, { pro_id, pro_situacao })
+            addNotification(`Processo agora está ${getSituacao(pro_situacao).toLowerCase().slice(0,-1)}.`)
+            setProcesso(processo => ({...processo, pro_situacao}))
+        }
+        catch(erro: any){
+            showError('Erro ao editar processo.', erro)
         }
     }
 
@@ -126,12 +140,25 @@ const Processo: React.FC = () => {
                         <ButtonIcon title="Editar processo." style={{ marginRight: '10px'}} onClick={() => setShowModalEditarProcesso(true)}>
                             <AiOutlineForm style={{ fontSize: '2rem'}}/>
                         </ButtonIcon>
+                        {
+                            processo.pro_situacao === ProcessoSituacao.Ativo &&
+                            <ButtonIcon title="Arquivar processo." style={{ marginRight: '10px'}} onClick={() => atualizarSituacao(ProcessoSituacao.Arquivado)}>
+                                <BsFolderCheck style={{ fontSize: '2rem'}}/>
+                            </ButtonIcon>
+                        }
+                        {
+                            processo.pro_situacao === ProcessoSituacao.Arquivado &&
+                            <ButtonIcon title="Ativar processo." style={{ marginRight: '10px'}} onClick={() => atualizarSituacao(ProcessoSituacao.Ativo)}>
+                                <BsFolderX style={{ fontSize: '2rem'}}/>
+                            </ButtonIcon>
+                        }
                         <ButtonIcon title="Excluir processo." onClick={exlcuirProcesso}>
                             <AiOutlineFileExcel style={{ fontSize: '2rem'}}/>
                         </ButtonIcon>
                     </div>
                 </div>
                 <hr/>
+                <p>Situação: {getSituacao(processo.pro_situacao).slice(0,-1)}</p>
                 <p>CNJ: {processo.pro_cnj}</p>
             </Row>
             <Row style={{ width: '100%'}}>
