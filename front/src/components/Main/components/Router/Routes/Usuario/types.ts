@@ -6,3 +6,7 @@ export interface IUsuario {
     usu_verificado: boolean
     usu_administrador: boolean
 }
+
+export interface BasicUsuario {
+    usu_tag: string
+}

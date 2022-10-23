@@ -21,12 +21,14 @@ router.use(jwt({ secret , algorithms: ["HS512"] }), CheckAuthorize)
 router.get('/processos', UsuarioEndpoints.getProcessosResponsabilidade)
 router.get('/tarefas', UsuarioEndpoints.getTarefasResponsabilidade)
 router.get('/notificacoes', UsuarioEndpoints.getNotificacoesNaoVistas)
-router.get('/:usu_id/processos', UsuarioEndpoints.getProcessosResponsabilidade)
-router.get('/:usu_id/tarefas', UsuarioEndpoints.getTarefasResponsabilidade)
-
-router.get('/', UsuarioEndpoints.getAllUsuario)
 router.get('/me', UsuarioEndpoints.getCurrentUsuario)
-router.get('/:usu_id', UsuarioEndpoints.getUsuario)
+router.get('/', UsuarioEndpoints.getAllUsuario) // Caso não for admin, retorna somente as tags de usuário
+router.post('/alterar-senha', checkBodyParameters(['senha_atual', 'nova_senha']), UsuarioEndpoints.alterarSenha)
+
+//Permitido para o próprio usuário, caso contrário, somente admin
+router.get('/:usu_id', UsuarioEndpoints.getUsuario) // Permitido para o 
+router.get('/:usu_id/processos', UsuarioEndpoints.sameUser, UsuarioEndpoints.getProcessosResponsabilidade)
+router.get('/:usu_id/tarefas', UsuarioEndpoints.sameUser, UsuarioEndpoints.getTarefasResponsabilidade)
 
 // Somente admins
 router.use(UsuarioEndpoints.checkIsAdmin)

@@ -54,3 +54,8 @@ export const gerarSenha = (tamanho: number = 8) => {
         senha += String.fromCharCode(getRandomInt(33, 126))
     return senha
 }
+
+export const Capitalize = (str: string) => {
+    str[0].toUpperCase()
+    return str
+}

@@ -11,7 +11,7 @@ interface Props {
 const Processo: React.FC<Props> = ({ processo:{ pro_id, pro_cnj, pro_titulo } }) => {
 
     return (
-        <Li as={Link} to={`/processos/${pro_id}`}>
+        <Li as={Link} to={`/processos/${pro_cnj}`}>
             <div>
                 <span style={{fontWeight: 'bold'}}>{pro_titulo}</span>
                 <span>{pro_cnj}</span>

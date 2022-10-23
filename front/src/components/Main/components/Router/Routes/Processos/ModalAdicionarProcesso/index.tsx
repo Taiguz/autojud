@@ -1,21 +1,45 @@
-import React, { FormEvent, useContext, useState } from 'react'
+import React, { FormEvent, useContext, useEffect, useState } from 'react'
 import { Alert, Form, Modal } from 'react-bootstrap'
 import Button from '../../../../Button'
 import { IProcesso } from '../../Processo/types'
 import validator from 'validator'
-import { validarProcessoCNJ, validarProcessoTitulo } from '../utils'
+import { validarProcessoCNJ, validarProcessoResponsaveisTags, validarProcessoTitulo } from '../utils'
+import api from '../../../../../../../api'
+import { useError } from '../../../../..'
+import { IUsuario } from '../../Usuario/types'
+import { v4 } from 'uuid'
+import Loader from '../../../../Loader'
 
 interface Props {
     show: boolean
     setShow: (b: boolean) => void
-    adicionar: (processo: IProcesso) => Promise<void>
+    adicionar: (processo: IProcesso, usu_tag: string) => Promise<void>
 }
 
 const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) => {
 
-    const [processo, setProcesso] = useState<IProcesso>({ pro_id: 0, pro_cnj: '', pro_titulo: ''})
+    const [processo, setProcesso] = useState<IProcesso>({ pro_id: 0, pro_cnj: '', pro_titulo: '', pro_situacao: 0})
+    const [usuarios, setUsuarios] = useState<string[]>([])
+    const [tag, setTag] = useState('')
     const [validar, setValidar] = useState(false)
     const [adicionando, setAdicionando] = useState(false)
+    const [carregando, setCarregando] = useState(true)
+    const showError = useError()
+
+    useEffect(() => {
+        const fetch = async () => {
+            try{
+                const { data } = await api.get<{usu_tag: string}[]>('usuario')
+                setUsuarios(data.map(({ usu_tag }) => usu_tag ))
+                setCarregando(false)
+            }
+            catch(erro){
+                setShow(false)
+                showError('Erro retornando os usuários.')
+            }
+        }
+        fetch()
+    }, [setShow, showError])
 
     const handleClose = () => {
         if(!adicionando)
@@ -26,9 +50,11 @@ const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) =
         event.preventDefault()
         event.stopPropagation()
         setValidar(true)
-        if(validarProcessoTitulo(processo.pro_titulo) && validarProcessoCNJ(processo.pro_cnj)){
+        if(validarProcessoTitulo(processo.pro_titulo) &&
+           validarProcessoCNJ(processo.pro_cnj) &&
+           validarProcessoResponsaveisTags(tag, usuarios)){
             setAdicionando(true)
-            await adicionar(processo)
+            await adicionar(processo, tag)
             setShow(false)
         }
     }
@@ -38,8 +64,9 @@ const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) =
             <Modal.Header closeButton>
                 <Modal.Title>Adicionar processo</Modal.Title>
             </Modal.Header>
-            <Modal.Body>
-                <Form onSubmit={adicionarProcesso} id="adicionarProcesso">
+              <Modal.Body>
+                { carregando ?  <Loader/> :
+                    <Form onSubmit={adicionarProcesso} id="adicionarProcesso">
                     <Form.Group className="mb-3">
                         <Form.Label>Título do processo</Form.Label>
                         <Form.Control 
@@ -66,11 +93,31 @@ const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) =
                         />
                         <Form.Control.Feedback type="invalid">O número de CNJ deve ter um formato válido.</Form.Control.Feedback>
                     </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Responsável</Form.Label>
+                        <Form.Control
+                            required
+                            placeholder="Responsável 1, Responsável 2..." 
+                            type="input"
+                            list="user-data"
+                            value={tag}
+                            onChange={({ target: { value }}) => setTag(value)}
+                            isValid={validar && validarProcessoResponsaveisTags(tag, usuarios)}
+                            isInvalid={validar && !validarProcessoResponsaveisTags(tag, usuarios)}
+                        />
+                        <datalist id="user-data">
+                            {usuarios.map(usuario => <option key={v4()} value={usuario}>{usuario}</option>)}
+                        </datalist>
+                        <Form.Control.Feedback type="invalid">
+                            Por favor verifique se as tags de usuário são válidas.
+                        </Form.Control.Feedback>
+                    </Form.Group>
                 </Form>
+                }
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={handleClose} disabled={adicionando}>Cancelar</Button>
-                <Button type="submit" form="adicionarProcesso" level="primary" disabled={adicionando}>{adicionando ? 'Adicionando...' : 'Adicionar'}</Button>
+                <Button onClick={handleClose} disabled={adicionando || carregando}>Cancelar</Button>
+                <Button type="submit" form="adicionarProcesso" level="primary" disabled={adicionando || carregando}>{adicionando ? 'Adicionando...' : 'Adicionar'}</Button>
             </Modal.Footer>
         </Modal>
     )

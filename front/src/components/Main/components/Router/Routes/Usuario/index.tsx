@@ -24,6 +24,7 @@ const Usuario: React.FC = () => {
     const [usuario, setUsuario] = useState<IUsuario>({ usu_id: 0, usu_email: '', usu_oab: '', usu_tag: tag || '', usu_verificado: false, usu_administrador: false })
     const [processos, setProcessos] = useState<IProcesso[]>([])
     const [tarefas, setTarefas] = useState<ITarefa[]>([])
+    const { setLogado, usuario: usuarioLogado } = useContext(MainContext)
     const showError = useError()
     const addNotification = useNotification()
 
@@ -100,12 +101,17 @@ const Usuario: React.FC = () => {
                 <div className='d-flex justify-content-between align-items-center'>
                     <h1>{usuario.usu_tag}</h1>
                     <div className="d-flex flex-row">
-                        <ButtonIcon title="Editar usuário." style={{ marginRight: '10px'}} onClick={() => setShowModalEditarUsuario(true)}>
-                            <AiOutlineForm style={{ fontSize: '2rem'}}/>
-                        </ButtonIcon>
-                        <ButtonIcon title="Excluir usuário." onClick={exlcuirUsuario}>
-                            <AiOutlineFileExcel style={{ fontSize: '2rem'}}/>
-                        </ButtonIcon>
+                        {
+                            usuarioLogado.usu_administrador &&
+                            <>
+                                <ButtonIcon title="Editar usuário." style={{ marginRight: '10px'}} onClick={() => setShowModalEditarUsuario(true)}>
+                                    <AiOutlineForm style={{ fontSize: '2rem'}}/>
+                                </ButtonIcon>
+                                <ButtonIcon title="Excluir usuário." onClick={exlcuirUsuario}>
+                                    <AiOutlineFileExcel style={{ fontSize: '2rem'}}/>
+                                </ButtonIcon>
+                            </>
+                        }
                     </div>
                 </div>
                 <hr/>

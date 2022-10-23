@@ -12,7 +12,7 @@ import { AndamentoController, TarefaController, UsuarioController } from '.'
 
 // All functions here are expected to throw erros
 //  should ne handled by the caller
-const attributes = ['pro_id', 'pro_cnj', 'pro_titulo']
+const attributes = ['pro_id', 'pro_cnj', 'pro_titulo', 'pro_situacao']
 
 const andamentosPorPagina = 25
 
@@ -129,6 +129,18 @@ export const addResponsavel = async (usu_id: number, pro_id: number) => {
     const usuario = await UsuarioController.getInstance(usu_id)
     const processo = await getInstance(pro_id)
     await modelProcessoResponsavel.create({ usu_id: usuario.usu_id, pro_id: processo.pro_id })
+}
+
+export const addResponsaveisByTag = async (usu_tag: string[], pro_id: number) => {
+    const usuarios = await UsuarioController.getInstancesByTag(usu_tag)
+    const processo = await getInstance(pro_id)
+    const responsaveis = usuarios.map(({ usu_id }) => ({ usu_id, pro_id: processo.pro_id }))
+    await modelProcessoResponsavel.bulkCreate(responsaveis, { ignoreDuplicates: true })
+}
+
+export const removeResponsavelByTag = async (usu_tag: string, pro_id: number) => {
+    const { usu_id } = await UsuarioController.getInstanceByTag(usu_tag)
+    await modelProcessoResponsavel.destroy({ where: { usu_id, pro_id }})
 }
 
 export const removeResponsavel = async (usu_id: number, pro_id: number) => {

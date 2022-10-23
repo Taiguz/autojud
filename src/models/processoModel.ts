@@ -59,5 +59,13 @@ export const modelProcesso = database.define<ModelProcesso>('processo', {
             validate: {
                 isInt: true
             }
+        },
+        pro_situacao: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0,
+            validate: {
+                isInt: true
+            }
         }
 }, modelOptions)

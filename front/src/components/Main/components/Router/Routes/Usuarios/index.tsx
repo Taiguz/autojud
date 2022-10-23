@@ -25,6 +25,7 @@ const Usuarios: React.FC = () => {
     const { setBreadCrumb } = useContext(MainContext)
     const addNotification = useNotification()
     const navigate = useNavigate()
+    const { setLogado, usuario } = useContext(MainContext)
 
     useEffect(() => {
         const fetchUsuario = async () => {
@@ -64,6 +65,9 @@ const Usuarios: React.FC = () => {
         }
     }
 
+
+    if(!usuario.usu_administrador)
+        return <>Não há nada aqui :(</>
 
     if(carregando)
         return <Loader/>

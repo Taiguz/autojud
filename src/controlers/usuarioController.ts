@@ -75,6 +75,20 @@ export const getInstance = async (usu_id: number): Promise<ModelUsuario> => {
     return usuario
 }
 
+export const getInstanceByTag = async (usu_tag: string): Promise<ModelUsuario> => {
+    const usuario = await modelUsuario.findOne({ where: { usu_tag }})
+    if(usuario === null)
+        throw new Error('Usuário não existe.')
+    return usuario
+}
+
+export const getInstancesByTag = async (usu_tag: string[]): Promise<ModelUsuario[]> => {
+    const usuario = await modelUsuario.findAll({ where: { usu_tag }})
+    if(usuario.length === 0)
+        throw new Error('Nenhum usuário encontrado.')
+    return usuario
+}
+
 export const getAllProcessosSobreResponsabilidade = async (usu_id: number): Promise<Processo[]> => {
     const responsaveis = await modelProcessoResponsavel.findAll({ where: { usu_id } })
     const processosResponsabilidade = responsaveis.map(({ pro_id }) => pro_id)
@@ -121,6 +135,11 @@ export const remove = async (usu_id: number) => {
 export const getAll = async (): Promise<Usuario[]> => {
     const usuarios = await modelUsuario.findAll({ attributes })
     return usuarios.map(usuario => usuario.get())
+}
+
+export const getAllTags = async (): Promise<{ usu_tag: string }[]> => {
+    const usuarios = await modelUsuario.findAll({ attributes: ['usu_tag'] })
+    return usuarios.map(({ usu_tag }) => ({ usu_tag }))
 }
 
 export const authenticate = async (email: string, password: string): Promise<string> => {
