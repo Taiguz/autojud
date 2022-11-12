@@ -11,17 +11,16 @@ const secret = getEnv('SECRET')
 router.use(jwt({ secret , algorithms: ["HS512"] }), CheckAuthorize)
 router.get('/', ProcessoEndpoints.getAllProcessos)
 router.get('/:pro_id', ProcessoEndpoints.getProcesso)
+router.delete('/:pro_id', ProcessoEndpoints.deletarProcesso)
+router.post('/', ProcessoEndpoints.createProcesso)
+router.put('/', ProcessoEndpoints.atualizarProcesso)
 router.get('/:pro_id/andamentos/:start_and_id', ProcessoEndpoints.getAndamentos)
-router.post('/:pro_id/andamentos', ProcessoEndpoints.createAndamento)
-
+router.get('/:pro_id/buscando-andamentos', ProcessoEndpoints.buscandoAndamentos)
 // Responsaveis
 router.get('/:pro_id/responsavel', ProcessoEndpoints.getResponsaveis)
 router.post('/:pro_id/responsavel', ProcessoEndpoints.addResponsaveisProcessoByTag)
 router.delete('/:pro_id/responsavel/:usu_tag', ProcessoEndpoints.removeResponsavelProcesso)
-
-router.delete('/:pro_id', ProcessoEndpoints.deletarProcesso)
-router.post('/', ProcessoEndpoints.createProcesso)
-router.put('/', ProcessoEndpoints.atualizarProcesso)
+// Tarefas
 router.post('/:pro_id/tarefa', ProcessoEndpoints.createTarefa)
 router.get('/:pro_id/tarefa', ProcessoEndpoints.getTarefas)
 

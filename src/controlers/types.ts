@@ -3,12 +3,22 @@ export interface CreateProcesso {
     pro_titulo: string
 }
 
+export interface ProcessoUpdate { 
+    pro_id: number
+    pro_cnj?: string
+    pro_titulo?: string
+    pro_external_id?: number
+    pro_ultimo_andamento?: string
+    pro_buscando_andamentos?: boolean
+}
+
 export interface Processo { 
     pro_id: number
     pro_cnj: string
     pro_titulo: string
     pro_external_id?: number
     pro_ultimo_andamento?: string
+    pro_buscando_andamentos?: boolean
     andamentos?: Andamento[]
 }
 

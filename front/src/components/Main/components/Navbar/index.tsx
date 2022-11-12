@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
     }
 
     return (
-      <BNavbar bg="dark" expand="lg" variant="dark" style={{ width: '100%', paddingLeft: '20px', paddingRight: '20px'}}>
+      <BNavbar bg="dark" expand="lg" variant="dark" style={{ width: '100%', paddingLeft: '20px', paddingRight: '20px', zIndex: '1001'}}>
         {
           showModalAlterarSenha &&
             <ModalAlterarSenha show={showModalAlterarSenha} setShow={setShowModalAlterarSenha}/>

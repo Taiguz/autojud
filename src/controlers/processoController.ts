@@ -1,7 +1,7 @@
 import database from '../database'
 import { Model } from 'sequelize'
 import { modelAndamento, modelProcesso, modelProcessoResponsavel, modelUsuario } from '../models'
-import { Andamento, CreateAndamento, CreateProcesso, Processo, Tarefa, Usuario } from './types'
+import { Andamento, CreateAndamento, CreateProcesso, Processo, ProcessoUpdate, Tarefa, Usuario } from './types'
 import { ModelAndamento, ModelProcesso } from '../models/types'
 import { buscarAndamentos } from '../buscador'
 import { sanitizeObject } from '../utils/utils'
@@ -12,7 +12,7 @@ import { AndamentoController, TarefaController, UsuarioController } from '.'
 
 // All functions here are expected to throw erros
 //  should ne handled by the caller
-const attributes = ['pro_id', 'pro_cnj', 'pro_titulo', 'pro_situacao']
+const attributes = ['pro_id', 'pro_cnj', 'pro_titulo', 'pro_situacao', 'pro_buscando_andamentos']
 
 const andamentosPorPagina = 25
 
@@ -20,6 +20,11 @@ export const create = async (processo: CreateProcesso): Promise<Processo> => {
     const createdProcesso = await modelProcesso.create(processo)
     buscarAndamentos(createdProcesso, false)
     return sanitizeObject(createdProcesso.get(), attributes)
+}
+
+export const isBuscandoAndamentos = async (pro_id: number): Promise<Boolean> => {
+    const { pro_buscando_andamentos } = await get(pro_id)
+    return pro_buscando_andamentos === true
 }
 
 export const get = async (pro_id: number): Promise<Processo> => {
@@ -48,7 +53,7 @@ export const getInstance = async (pro_id: number): Promise<ModelProcesso> => {
     return processo
 }
 
-export const update = async (processo: Processo) => {
+export const update = async (processo: ProcessoUpdate) => {
     const { pro_id } = processo
     const processoExistente = await getInstance(pro_id)
     if (processoExistente === null)

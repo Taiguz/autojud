@@ -67,5 +67,10 @@ export const modelProcesso = database.define<ModelProcesso>('processo', {
             validate: {
                 isInt: true
             }
+        },
+        pro_buscando_andamentos: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            defaultValue: true
         }
 }, modelOptions)
