@@ -24,6 +24,19 @@ export const createProcesso = async (request: Request, response: Response) => {
     }
 }
 
+export const buscandoAndamentos = async (request: Request, response: Response) => {
+    try { 
+        if(!validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}))
+            throw new Error('Parâmetros de requisição inválidos.')
+        const pro_id = parseInt(request.params.pro_id)
+        response.status(httpCodes.OK).json({ buscando: await ProcessoController.isBuscandoAndamentos(pro_id)})
+    }
+    catch(error){
+        logger.error('Erro ao consultar processo.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao consultar processo.'})
+    }
+}
+
 export const getAllProcessos = async (request: Request, response: Response) => {
     try {
         const processos = await ProcessoController.getAll()
@@ -179,7 +192,6 @@ export const getResponsaveis = async (request: Request, response: Response) => {
 }
 
 // TODO: Experimental, retirar após testes
-
 export const createAndamento = async (request: Request, response: Response) => {
     const pro_id = parseInt(request.params.pro_id)
     const { and_data } = request.body

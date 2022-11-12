@@ -34,7 +34,8 @@ export interface RetornoConsultaAndamentoTribunal {
                 data: string
                 conteudo: string
                 id: number
-            }[]
+            }[],
+            documentos_publicos: any[]
         }[]
     }
 }

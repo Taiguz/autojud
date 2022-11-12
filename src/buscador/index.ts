@@ -8,6 +8,7 @@ import { format, parse } from "date-fns";
 import logger from "../utils/logger";
 import { EscavadorStatus, RetornoAndamentosDiariosOficiais, RetornoConsultaAndamentoTribunal } from "./types";
 import { notificarAndamentosResponsaveis } from "../notificador";
+import fs from 'fs'
 
 // Pesquisa de andamentos no site do tribunal
 // api/v1/processo-tribunal/{numero}/async
@@ -25,10 +26,11 @@ const intervaloBuscaAndamentosTribunalMillis = 1000
 // se novos tiverem sido inseridos. Salva a data do último andamento inserido em processo.
 export const buscarAndamentos = async (processo: ModelProcesso, notify: boolean = true) => {
     try {
+        await ProcessoController.update({ pro_id: processo.pro_id, pro_buscando_andamentos: true })
         const { pro_external_id } = processo
         let ultimoAndamento: Andamento | null = null
         // Processo recem criado
-        if(pro_external_id === null) 
+        if(!pro_external_id) 
             await buscaProcessoExternalID(processo)
         else 
             ultimoAndamento = await ProcessoController.getUltimoAndamentoInstance(processo.pro_id)
@@ -54,6 +56,8 @@ export const buscarAndamentos = async (processo: ModelProcesso, notify: boolean 
         }
     } catch (error) {
         logger.error(`Erro buscando os andamentos do processo ${processo.pro_id}.`, error)
+    } finally {
+        await ProcessoController.update({ pro_id: processo.pro_id, pro_buscando_andamentos: false })
     }
 }
 
@@ -89,6 +93,7 @@ const buscaAndamentosTribunais = async (processo: ModelProcesso, notify: boolean
         const salvarAndamentos = async (processo: RetornoConsultaAndamentoTribunal) => {
             console.log('salvando andamentos')
             const {resposta: {instancias} } = processo
+            fs.writeFileSync(`./logs/${pro_cnj}.txt`, JSON.stringify(instancias.flatMap(({ documentos_publicos }) => documentos_publicos )))
             const movimentacoes: CreateAndamento[] = instancias
                 .flatMap(({movimentacoes}) => movimentacoes )
                 .map(({ id, conteudo, data}) => ({ and_external_id: id, and_descricao: conteudo, and_data: format(parse(data, 'dd/MM/yyyy', new Date()),'yyyy-MM-dd'), pro_id }))
@@ -116,7 +121,7 @@ const buscaAndamentosTribunais = async (processo: ModelProcesso, notify: boolean
 
         // TODO: Isso aqui só deve retornar quando todas as func recursivas chamadas retornarem
         // no caso está esperando só a primeira
-        await buscar(`processo-tribunal/${pro_cnj}/async`, { params: { wait: 1 }})
+        await buscar(`processo-tribunal/${pro_cnj}/async`, { params: { wait: 1, documentos_publicos: 1 }})
 
         
     } catch (error) {

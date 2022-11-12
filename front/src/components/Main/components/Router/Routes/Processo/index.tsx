@@ -5,7 +5,7 @@ import api from '../../../../../../api'
 import Loader from '../../../Loader'
 import { CustomContainer, Ul } from './style'
 import { IProcesso, ProcessoSituacao } from './types'
-import { Row, Col } from 'react-bootstrap'
+import { Row, Col, Spinner, Badge } from 'react-bootstrap'
 import { IAndamento } from '../Andamentos/types'
 import { IUsuario } from '../Usuario/types'
 import { ITarefa } from '../Tarefas/types'
@@ -22,6 +22,7 @@ import ListaResponsaveis from '../../../Listas/Responsaveis'
 import { adicionarTarefa } from '../Tarefas/utils'
 import ModalAdicionarTarefa from '../../../Modais/ModalAdicionarTarefa'
 import { getSituacao } from '../Processos/utils'
+import { getBuscandoAndamentosIntervalMs } from '../../../../../../constants'
 const Processo: React.FC = () => {
 
     const navigate = useNavigate()
@@ -63,6 +64,21 @@ const Processo: React.FC = () => {
         }
         fetchProcesso()
     },[processoId, showError])
+
+    useEffect(() => {
+        if(processo.pro_id === 0 || processo.pro_buscando_andamentos === false) return
+        const fetchBuscandoAndamentos = async () => {
+            try{
+                const { data: { buscando } } = await api.get<{ buscando: boolean }>(`processo/${processo.pro_id}/buscando-andamentos`)
+                if(buscando === false) navigate(0)
+            }
+            catch(erro){
+                showError('Erro ao buscando informações do processo.')
+            }
+        }
+        const interval = setInterval(fetchBuscandoAndamentos, getBuscandoAndamentosIntervalMs)
+        return () => clearInterval(interval);
+    }, [showError, processo.pro_id, processo.pro_buscando_andamentos, navigate])
 
     const exlcuirProcesso = async () => {
         try{
@@ -135,7 +151,18 @@ const Processo: React.FC = () => {
             }
             <Row>
                 <div className='d-flex justify-content-between align-items-center'>
-                    <h1>{processo.pro_titulo}</h1>
+                    <div className="d-flex align-items-center">
+                        <h1>{processo.pro_titulo}</h1>
+                        { 
+                            processo.pro_buscando_andamentos &&
+                            <div style={{ marginLeft: '10px'}}>
+                                <Badge bg="success" pill className="d-flex align-items-center">
+                                    <Spinner animation="grow" variant="light" size="sm"/>
+                                    <span style={{ marginLeft: '5px'}}>Buscando andamentos...</span>
+                                </Badge>
+                            </div>
+                        }
+                    </div>
                     <div className="d-flex flex-row">
                         <ButtonIcon title="Editar processo." style={{ marginRight: '10px'}} onClick={() => setShowModalEditarProcesso(true)}>
                             <AiOutlineForm style={{ fontSize: '2rem'}}/>
@@ -167,7 +194,7 @@ const Processo: React.FC = () => {
                     <hr/>
                     {andamentos.length > 0 ?
                         <Ul>{andamentos.slice(0, 5).map(andamento => <Andamento key={v4()} andamento={andamento} processoId={processo.pro_cnj}/>)}</Ul> :
-                        <>Nenhum andamento.</>
+                         processo.pro_buscando_andamentos ? <Loader/> : <>Nenhum andamento.</>
                     }
                     { andamentos.length > 5 ? <Link to={`/processos/${processo.pro_cnj}/andamentos`}>Ver mais...</Link> : null}
                 </Col>

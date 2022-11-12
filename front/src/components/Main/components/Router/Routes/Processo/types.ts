@@ -8,4 +8,5 @@ export interface IProcesso {
     pro_cnj: string
     pro_titulo: string
     pro_situacao?: number
+    pro_buscando_andamentos?: boolean
 }

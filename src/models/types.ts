@@ -10,6 +10,7 @@ export interface ModelProcesso extends Model<InferAttributes<ModelProcesso>, Inf
     pro_ultimo_andamento?: string
     pro_external_id?: number
     pro_situacao?: number
+    pro_buscando_andamentos?: boolean
 }
 
 export interface ModelAndamento extends Model<InferAttributes<ModelAndamento>, InferCreationAttributes<ModelAndamento>> {

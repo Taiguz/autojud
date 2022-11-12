@@ -15,7 +15,7 @@ interface Props {
 const Andamento: React.FC<Props>  = ({ andamento: {and_data, and_descricao, and_id }, processoId }) => {
     return (
         <Li as={Link} to={`/processos/${processoId}/andamentos/${and_id}`}>
-            <span style={{ fontWeight: 'bold'}} >{format(parseISO(and_data), 'dd/MM/yyyy' )}</span>
+            <span style={{ fontWeight: 'bold', marginRight: '15px'}} >{format(parseISO(and_data), 'dd/MM/yyyy' )}</span>
             <span>{and_descricao}</span>
             <TbArrowForward width={40}/>
         </Li>
