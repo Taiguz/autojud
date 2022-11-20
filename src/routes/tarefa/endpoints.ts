@@ -6,6 +6,7 @@ import logger from '../../utils/logger'
 import validator from 'validator'
 import { ValidationError } from 'sequelize'
 import { buscarTarefasEmVencimento } from '../../notificador/notificadorTarefas'
+import { CustomValidatorError } from '../../utils/erros'
 
 export const createSubtarefa = async (request: Request, response: Response) => {
     const tarefa = request.body
@@ -25,6 +26,9 @@ export const createSubtarefa = async (request: Request, response: Response) => {
         if(error instanceof ValidationError){
             const message = error.errors.map(({message}) => message).join(' ') 
             response.status(httpCodes.SERVER_ERROR).json({ message })
+        }
+        else if(error instanceof CustomValidatorError){
+            response.status(httpCodes.SERVER_ERROR).json({ message: error.message })
         }
         else 
             response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao criar subtarefa.'})
@@ -69,6 +73,9 @@ export const atualizarTarefa = async (request: Request, response: Response) => {
         if(error instanceof ValidationError){
             const message = error.errors.map(({message}) => message).join(' ') 
             response.status(httpCodes.SERVER_ERROR).json({ message })
+        }
+        else if(error instanceof CustomValidatorError){
+            response.status(httpCodes.SERVER_ERROR).json({ message: error.message })
         }
         else response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao atualizar tarefa.'})
     }

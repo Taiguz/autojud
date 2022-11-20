@@ -101,8 +101,8 @@ const Tarefa: React.FC = () => {
             addNotification('Tarefa excluída com sucesso.')
             navigate(`/processos/${processo.pro_cnj}/tarefas`)
         }
-        catch(error){
-            showError('Erro ao excluir tarefa.')
+        catch(error: any){
+            showError('Erro ao excluir tarefa.', error as Error)
         }
     }
 
@@ -112,8 +112,8 @@ const Tarefa: React.FC = () => {
             addNotification('Subtarefa excluída com sucesso.')
             navigate(`/processos/${processo.pro_cnj}/tarefas/${tarefa.tar_pai_id}`)
         }
-        catch(error){
-            showError('Erro ao excluir subtarefa.')
+        catch(error: any){
+            showError('Erro ao excluir subtarefa.', error as Error)
         }
     }
 
@@ -126,8 +126,8 @@ const Tarefa: React.FC = () => {
             addNotification('Tarefa alterada com sucesso.')
             setTarefa(tarefa => ({ ...tarefa, tar_data_cadastro, tar_data_termino, tar_objetivo }))
         }
-        catch(error){
-            showError('Erro ao editar tarefa.')
+        catch(error: any){
+            showError('Erro ao editar tarefa.', error as Error)
         }
     }
 
@@ -138,8 +138,8 @@ const Tarefa: React.FC = () => {
             addNotification('Subtarefa alterada com sucesso.')
             setTarefa(tarefa => ({ ...tarefa, tar_data_cadastro, tar_data_termino, tar_objetivo }))
         }
-        catch(error){
-            showError('Erro ao editar subtarefa.')
+        catch(error: any){
+            showError('Erro ao editar subtarefa.', error as Error)
         }
     }
 
@@ -154,8 +154,8 @@ const Tarefa: React.FC = () => {
 
             setTarefa({...tarefa, tar_situacao: !tarefa.tar_situacao })
         }
-        catch(error){
-            showError('Erro ao concluir a tarefa.')
+        catch(error: any){
+            showError('Erro ao concluir a tarefa.', error as Error)
         }
     }
 
@@ -168,8 +168,8 @@ const Tarefa: React.FC = () => {
 
             setTarefa({...tarefa, tar_situacao: !tarefa.tar_situacao })
         }
-        catch(error){
-            showError('Erro ao concluir subtarefa.')
+        catch(error: any){
+            showError('Erro ao concluir subtarefa.', error as Error)
         }
     }
 

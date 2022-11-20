@@ -4,8 +4,9 @@ import { modelTarefa } from '../models'
 import { UsuarioController } from '.'
 import { modelProcesso, modelTarefaResponsavel } from '../models'
 import { Op } from 'sequelize'
-import { addDays } from 'date-fns'
+import { addDays, addHours, compareDesc, isAfter, isBefore, parseISO, setHours } from 'date-fns'
 import { diasDeAntecedenciaParaAvisoTarefas } from '../utils/constants'
+import { CustomValidatorError } from '../utils/erros'
 
 
 // All functions here are expected to throw erros
@@ -51,8 +52,17 @@ export const getTarefas = async (tar_id: number[]): Promise<Tarefa[]> => {
     return tarefas.map(tarefa => tarefa.get())
 }
 
+const checkIsSubtarefaValida = (subtarefa: Tarefa, tarefa: Tarefa) => {
+    debugger
+    if(isAfter(setHours(parseISO(subtarefa.tar_data_termino),12), setHours(parseISO(tarefa.tar_data_termino),12)))
+        throw new CustomValidatorError('Subtarefa tem data de término maior que a tarefa. Subtarefa deve acontecer entre o começo e fim da tarefa.')
+    if(isBefore(setHours(parseISO(subtarefa.tar_data_cadastro),12), setHours(parseISO(tarefa.tar_data_cadastro),12)))
+        throw new CustomValidatorError('Subtarefa tem data de cadastro menor que a tarefa. Subtarefa deve acontecer entre o começo e fim da tarefa.')
+}
+
 export const createSubtarefa = async (tarefa: Tarefa) => {
     const tarefaExistente = await getInstance(tarefa.tar_id)
+    checkIsSubtarefaValida(tarefa, tarefaExistente)
     const sanitizedTarefa = {...tarefa, tar_id: undefined, tar_pai_id: tarefa.tar_id, pro_id: tarefaExistente.pro_id}
     const createdTarefa = await modelTarefa.create(sanitizedTarefa)
     return sanitizeObject(createdTarefa.get(), attributes)
@@ -60,10 +70,13 @@ export const createSubtarefa = async (tarefa: Tarefa) => {
 
 export const update = async (tarefa: Tarefa) => {
     const { tar_id } = tarefa
-    debugger
     const tarefaExistente = await getInstance(tar_id)
     if (tarefaExistente === null)
         throw new Error('Tarefa não existe.')
+    if (tarefaExistente.tar_pai_id && (tarefa.tar_data_cadastro || tarefa.tar_data_termino)){
+        const tarefaPai = await getInstance(tarefaExistente.tar_pai_id)
+        checkIsSubtarefaValida(tarefa, tarefaPai)
+    }
     await tarefaExistente.update(tarefa)
     await tarefaExistente.save()
 }
