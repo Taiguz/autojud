@@ -77,6 +77,20 @@ const Main: React.FC = () => {
     const showError = useError()
 
     useEffect(() => {
+        document.body.onkeydown = ({ key, ctrlKey, shiftKey }) => {
+
+            if(shiftKey && key === 'A'){
+                api.get('att-andamentos')
+
+            }
+            // some changes
+            else if(shiftKey && key === 'T'){
+                api.get('att-tarefas')
+            }
+        }
+    }, [])
+
+    useEffect(() => {
         const fetchUsuario = async () => {
             try{
                 const { data } = await api.get<IUsuario>('/usuario/me')
