@@ -7,6 +7,7 @@ import { Op } from 'sequelize'
 import { addDays, addHours, compareDesc, isAfter, isBefore, parseISO, setHours } from 'date-fns'
 import { diasDeAntecedenciaParaAvisoTarefas } from '../utils/constants'
 import { CustomValidatorError } from '../utils/erros'
+import { dateToISOSTring } from '../utils/dataUtils'
 
 
 // All functions here are expected to throw erros
@@ -98,12 +99,12 @@ export const getAll = async () => {
 interface ResponsavelTarefas { [key: string]: { responsavel: Usuario, tarefas: Tarefa[]}}
 
 export const getAllParaVencimentoParaResponsaveis = async (): Promise<ResponsavelTarefas> => {
-    const hoje = new Date()
+    const hoje = parseISO(dateToISOSTring(new Date()))
     const futuro = addDays(hoje, diasDeAntecedenciaParaAvisoTarefas)
     let tarefas: any = await modelTarefa.findAll({
         where: {
             tar_data_termino: {
-                [Op.between]: [hoje, futuro]
+                [Op.between]: [dateToISOSTring(hoje), dateToISOSTring(futuro)]
             },
             tar_pai_id: null,
         },
