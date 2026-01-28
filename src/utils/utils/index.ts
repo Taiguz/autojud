@@ -14,7 +14,8 @@ export const sanitizeObject = (ob: any, attributes: string[], include: boolean =
 }
 
 export const getEmailTag = (email: string): string => {
-    return email.split('@')[0]
+    const tag = email.split('@')[0]
+    return tag.replace(/[^a-zA-Z0-9]/g, '')
 }
 
 export const assertOb = (ob: any, attributes: any): boolean => {

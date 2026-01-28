@@ -6,7 +6,7 @@ import { CustomContainer } from './style'
 import { GoLaw } from 'react-icons/go'
 import api from '../../../../api'
 import { MainContext, useError } from '../..'
-import { useNavigate } from 'react-router'
+import { useNavigate, Link } from 'react-router-dom'
 
 const Login: React.FC = () => {
 
@@ -55,6 +55,10 @@ const Login: React.FC = () => {
                             <Form.Check type="checkbox" label="Mantenha-me conectado" checked={salvarToken} onChange={({ target }) => setSalvarToken(target.checked)} />
                         </Form.Group>
                         <Button variant="dark" disabled={entrando} onClick={fazerLogin}>{entrando ? 'Entrando...' : 'Entrar'}</Button>
+                        <div className="text-center mt-3">
+                            <span>Não tem uma conta? </span>
+                            <Link to="/cadastrar" style={{ textDecoration: 'none' }}>Cadastre-se</Link>
+                        </div>
                     </Col>
                 </Row>
             </Container>

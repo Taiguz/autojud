@@ -4,7 +4,7 @@ import { isLogado } from '../../utils'
 import CustomError from './components/GenericError'
 import Notificador from './components/Notificador'
 import Router from './components/Router'
-import Login from './components/Login'
+import Cadastro from './components/Cadastro'
 import { BreadCrumb, CustomError as ICustomError, CustomMessage as ICustomMessage, MainContextType, Notificacao } from './types'
 import CustomMessage from './components/GenericMessage'
 import { Routes, Route, useLocation } from 'react-router'
@@ -13,8 +13,7 @@ import { IUsuario } from './components/Router/Routes/Usuario/types'
 import api from '../../api'
 import Loader from './components/Loader'
 import ModalAlterarSenha from './components/Modais/ModalAlterarSenha'
-
-
+import Login from './components/Login'
 
 export const MainContext = createContext<MainContextType>({ 
     breadCrumb: [],
@@ -27,7 +26,7 @@ export const MainContext = createContext<MainContextType>({
     setNotificacoes: () => {},
     logado: false,
     setLogado: () => {},
-    usuario: { usu_id: 0, usu_email: '', usu_oab: '', usu_administrador: false, usu_tag: '', usu_verificado: false },
+    usuario: { usu_nome: '', usu_id: 0, usu_email: '', usu_oab: '', usu_administrador: false, usu_tag: '', usu_verificado: false },
     setUsuario: () => {}
 })
 
@@ -72,7 +71,7 @@ const Main: React.FC = () => {
     const [message, setMessage] = useState<ICustomMessage>({ trigger: false, message: '' })
     const [notificacoes, setNotificacoes] = useState<Notificacao[]>([])
     const [logado, setLogado] = useState(isLogado())
-    const [usuario, setUsuario] = useState<IUsuario>({ usu_id: 0, usu_email: '', usu_oab: '', usu_administrador: false, usu_tag: '', usu_verificado: false})
+    const [usuario, setUsuario] = useState<IUsuario>({ usu_nome: '', usu_id: 0, usu_email: '', usu_oab: '', usu_administrador: false, usu_tag: '', usu_verificado: false })
     const [carregando, setCarregando] = useState(false)
     const showError = useError()
 
@@ -121,13 +120,14 @@ const Main: React.FC = () => {
                     <Routes>
                         {logado ? 
                             <>
-                                <Route path="/login" element={<Login/>}/>
+                                <Route path="/login" element={<Login />} />
                                 <Route path="/verify/:token" element={<VerificaoUsuario/>}/>
                                 <Route path="*" element={<Router/>}/>
                             </> :
                             <>
                                 <Route path="/verify/:token" element={<VerificaoUsuario/>}/>
-                                <Route path="*" element={<Login/>}/>
+                                <Route path="/cadastrar" element={<Cadastro />} />
+                                <Route path="*" element={<Login />} />
                             </>
                         }
                     </Routes>

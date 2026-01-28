@@ -13,6 +13,7 @@ const secret = getEnv('SECRET')
 
 router.post('/login', checkBodyParameters(['email', 'password']), UsuarioEndpoints.autenticarUsuario)
 router.post('/verify/:token', checkBodyParameters(['senha_atual', 'nova_senha']), UsuarioEndpoints.verificarUsuarioTrocarSenha)
+router.post('/', checkBodyParameters(['usu_email', 'usu_senha', 'usu_nome']), UsuarioEndpoints.createUsuario)
 
 // Logado
 router.use(jwt({ secret , algorithms: ["HS512"] }), CheckAuthorize)
@@ -32,7 +33,6 @@ router.get('/:usu_id/tarefas', UsuarioEndpoints.sameUser, UsuarioEndpoints.getTa
 
 // Somente admins
 router.use(UsuarioEndpoints.checkIsAdmin)
-router.post('/', checkBodyParameters(['usu_email', 'usu_senha', 'usu_oab']), UsuarioEndpoints.createUsuario)
 router.delete('/:usu_id', UsuarioEndpoints.deletarUsuario)
 router.put('/', UsuarioEndpoints.atualizarUsuario)
 

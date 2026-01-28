@@ -3,18 +3,17 @@ import mailgun from 'nodemailer-mailgun-transport'
 import logger from '../utils/logger'
 import { getEnv } from '../utils/utils'
 
-const api_key = getEnv('MAILGUN_API_KEY')
-const domain = getEnv('MAILGUN_DOMAIN')
 const appname = getEnv('APP_NAME')
+const NODEMAILER_HOST = getEnv('NODEMAILER_HOST')
+const NODEMAILER_PASS = getEnv('NODEMAILER_PASS')
 
-const auth = {
-    auth:{
-        api_key,
-        domain
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: NODEMAILER_HOST,
+        pass: NODEMAILER_PASS
     }
-}
-
-const transporter = nodemailer.createTransport(mailgun(auth))
+})
 
 export const mail = async (to: string, subject: string, text: string) => {
     try{
@@ -25,6 +24,7 @@ export const mail = async (to: string, subject: string, text: string) => {
             text, // plain text body
             html: text, // html body
         });
+        console.log('Email enviado com sucesso para ' + to);
     }
     catch (error){
         logger.error('Erro ao enviar email.', error)

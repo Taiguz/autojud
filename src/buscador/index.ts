@@ -75,6 +75,7 @@ const buscaProcessoExternalID = async (processo: ModelProcesso) => { // TODO: Bu
     try {
         const { pro_cnj } = processo.get()
         const { data } = await api.get<{ id: number}[]>(`processos/numero/${pro_cnj}`)
+        if (data.length === 0) return
         const { id } = data[0]
         processo.update({ pro_external_id: id})
         await processo.save()
@@ -103,17 +104,34 @@ const buscaAndamentosTribunais = async (processo: ModelProcesso, notify: boolean
 
         // Revisar isso aqui
         const buscar = async (url: string, params: any) => {
-            const { data } = await api.get<RetornoConsultaAndamentoTribunal>(url, params)
-            
-            const { status } = data
+            let data: RetornoConsultaAndamentoTribunal | undefined = undefined
+            let status: RetornoConsultaAndamentoTribunal['status'] | undefined = undefined
+            let link_api: string | undefined = undefined
+            try {
+                const response = await api.get<RetornoConsultaAndamentoTribunal>(url, params)
+                data = response.data
+                console.log('data', data)
+                status = data.status
+                link_api = data.link_api
+            }
+            catch (error: any) {
+                const errorData = error.response?.data
+                console.log('errorData', errorData)
+                if ("error" in errorData && errorData.error.startsWith("Já existe uma busca assíncrona em aberto para esse processo.")) {
+                    status = EscavadorStatus.PENDENTE
+                    link_api = errorData.url
+                }
+                else
+                    throw error
+            }
 
-            if(!status) throw new Error('Erro na consulta dos andamentos.')
+            if (!status) throw new Error('Erro na consulta dos andamentos.')
 
             // TODO: Adicionar lógica de retentar caso dê erro na consulta
-            if(status === EscavadorStatus.SUCESSO)
+            if (status === EscavadorStatus.SUCESSO && data)
                 await salvarAndamentos(data)
-            else if(status === EscavadorStatus.PENDENTE)
-                setTimeout(() => buscar(data.link_api,{}), intervaloBuscaAndamentosTribunalMillis)
+            else if (status === EscavadorStatus.PENDENTE && link_api)
+                setTimeout(() => link_api && buscar(link_api, {}), intervaloBuscaAndamentosTribunalMillis)
             else throw new Error('Erro na consulta dos andamentos.')
 
         }
@@ -126,6 +144,8 @@ const buscaAndamentosTribunais = async (processo: ModelProcesso, notify: boolean
         
     } catch (error) {
         logger.error(`Erro buscando os andamentos do processo ${processo.pro_id}.`, error)
+        //@ts-ignore
+        console.log("Error", error.response?.data)
     }
 }
 
@@ -134,6 +154,7 @@ const buscaAndamentosDiariosOficiais = async (processo: ModelProcesso, notify: b
     try {
         //TODO: Validar se esta adicionando todos os itens das paginas corretamente com um processo grande
         const { pro_external_id, pro_id } = processo.get()
+        if (!pro_external_id) return
         // Requisicao por pagina
         const buscarPagina = async (page: number): Promise<RetornoAndamentosDiariosOficiais> => {
             const { data } = await api.get<RetornoAndamentosDiariosOficiais>(`processos/${pro_external_id}/movimentacoes`, {

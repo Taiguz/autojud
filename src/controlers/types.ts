@@ -37,6 +37,7 @@ export interface Andamento {
 }
 
 export interface CreateUsuario {
+    usu_nome: string
     usu_oab: string
     usu_email: string
     usu_senha: string

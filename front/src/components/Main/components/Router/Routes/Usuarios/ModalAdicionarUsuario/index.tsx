@@ -3,6 +3,8 @@ import { Alert, Form, Modal } from 'react-bootstrap'
 import Button from '../../../../Button'
 import { IUsuario } from '../../Usuario/types'
 import { validarUsuarioOAB, validarUsuarioTag, validarUsuarioEmail } from '../../Usuario/utils'
+import { useError } from '../../../../..'
+import { AxiosError } from 'axios'
 
 interface Props {
     show: boolean
@@ -12,9 +14,10 @@ interface Props {
 
 const ModalAdicionarUsuario: React.FC<Props> = ({ show, setShow, adicionar }) => {
 
-    const [usuario, setUsuario] = useState<IUsuario>({ usu_id: 0, usu_oab: '', usu_tag: '', usu_email: '', usu_verificado: false, usu_administrador: false})
+    const [usuario, setUsuario] = useState<IUsuario>({ usu_id: 0, usu_nome: '', usu_oab: '', usu_tag: '', usu_email: '', usu_verificado: false, usu_administrador: false })
     const [adicionando, setAdicionando] = useState(false)
     const [validar, setValidar] = useState(false)
+    const showError = useError()
 
     const handleClose = () => {
         if(!adicionando)
@@ -29,15 +32,26 @@ const ModalAdicionarUsuario: React.FC<Props> = ({ show, setShow, adicionar }) =>
            validarUsuarioEmail(usuario.usu_email) &&
            validarUsuarioOAB(usuario.usu_oab)){
             setAdicionando(true)
-            await adicionar(usuario)
-            setShow(false)
+            try {
+                await adicionar(usuario)
+                setShow(false)
+            }
+            catch (erro) {
+                if (erro instanceof (AxiosError) && erro.message) {
+                    showError(`Houve um erro ao adicionar usuário.\n${erro.message}`, erro as Error)
+                }
+                showError('Houve um erro ao adicionar usuário.', erro as Error)
+            }
+            finally {
+                setAdicionando(false)
+            }
         }
     }
 
     return (
         <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>Adicionar usuário</Modal.Title>
+                <Modal.Title>Adicionar usuário</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={adicionarUsuario} id="adicionarUsuario">

@@ -49,20 +49,12 @@ const Usuarios: React.FC = () => {
     }, [setBreadCrumb])
 
     const adicionarUsuario = async (usuario: IUsuario) => {
-        try{
-            const { usu_email, usu_tag, usu_oab, usu_administrador } = usuario
+        const { usu_nome, usu_email, usu_tag, usu_oab, usu_administrador } = usuario
             const senha = gerarSenha()
-            const { data: novoUsuario } = await api.post<IUsuario>('/usuario', { usu_email, usu_tag, usu_oab, usu_senha: senha, usu_administrador})
-            navigate(`/usuarios/${novoUsuario.usu_tag}`)
-            addNotification(`Usuário "${novoUsuario.usu_tag}" adicionado.`)
-            showMessage(`Um email foi enviado para ${usu_email}.\nO usuário deve entrar no link enviado para seu e-mail e alterar sua senha para poder realizar login no sistema.\nA senha atual da conta é: ${senha}`)
-        }
-        catch(erro: any){
-            if(erro instanceof(AxiosError) && erro.message){
-                showError(`Houve um erro ao adicionar usuário.\n${erro.message}`, erro as Error)
-            }
-            showError('Houve um erro ao adicionar usuário.', erro as Error)
-        }
+        const { data: novoUsuario } = await api.post<IUsuario>('/usuario', { usu_nome: 'usuario', usu_email, usu_tag, usu_oab, usu_senha: senha, usu_administrador })
+        navigate(`/usuarios/${novoUsuario.usu_tag}`)
+        addNotification(`Usuário "${novoUsuario.usu_tag}" adicionado.`)
+        showMessage(`Um email foi enviado para ${usu_email}.\nO usuário deve entrar no link enviado para seu e-mail e alterar sua senha para poder realizar login no sistema.\nA senha atual da conta é: ${senha}`)
     }
 
 

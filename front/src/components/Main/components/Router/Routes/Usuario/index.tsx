@@ -21,7 +21,7 @@ const Usuario: React.FC = () => {
     const [showModalEditarUsuario, setShowModalEditarUsuario] = useState(false)
     const { tag } = useParams()
     const [carregando, setCarregando] = useState(true)
-    const [usuario, setUsuario] = useState<IUsuario>({ usu_id: 0, usu_email: '', usu_oab: '', usu_tag: tag || '', usu_verificado: false, usu_administrador: false })
+    const [usuario, setUsuario] = useState<IUsuario>({ usu_nome: '', usu_id: 0, usu_email: '', usu_oab: '', usu_tag: tag || '', usu_verificado: false, usu_administrador: false })
     const [processos, setProcessos] = useState<IProcesso[]>([])
     const [tarefas, setTarefas] = useState<ITarefa[]>([])
     const { setLogado, usuario: usuarioLogado } = useContext(MainContext)

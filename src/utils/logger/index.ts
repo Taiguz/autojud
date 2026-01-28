@@ -13,8 +13,8 @@ const logger = createLogger({
   ),
   // TODO: Não loga no heroku!
   transports: [ // TODO rotate log files daily, request are already being rotated
-    //new transports.File({ filename: `./logs/${dataHoje}-server-error.log`, level: 'error' }),
-    //new transports.File({ filename: `./logs/${dataHoje}-server-info.log` }),
+    new transports.File({ filename: `./logs/${dataHoje}-server-error.log`, level: 'error' }),
+    new transports.File({ filename: `./logs/${dataHoje}-server-info.log` }),
     new transports.Console()
   ]
 });

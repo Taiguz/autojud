@@ -23,6 +23,7 @@ export interface ModelAndamento extends Model<InferAttributes<ModelAndamento>, I
 
 export interface ModelUsuario extends Model<InferAttributes<ModelUsuario>, InferCreationAttributes<ModelUsuario>> {
     usu_id: CreationOptional<number>
+    usu_nome: string
     usu_tag: string
     usu_email: string
     usu_senha: string

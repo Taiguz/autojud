@@ -11,6 +11,22 @@ export const modelUsuario = database.define<ModelUsuario>('usuario', {
         primaryKey: true,
         allowNull: false
     },
+    usu_nome: {
+        type: DataTypes.STRING(200),
+        allowNull: false,
+        validate: {
+            //isAlphanumeric: {
+            //msg: 'O nome do usuário não pode conter caracteres especiais.'
+            //},
+            notEmpty: {
+                msg: 'O nome do usuário não pode ser vazio.'
+            },
+            len: {
+                args: [4, 200],
+                msg: 'O nome do usuário deve ter entre 4 a 200 caracteres.'
+            }
+        }
+    },
     usu_tag: {
         type: DataTypes.STRING(20),
         allowNull: false,

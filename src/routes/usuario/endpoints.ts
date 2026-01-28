@@ -14,17 +14,19 @@ const segredoVerificarEmail = getEnv('SECRET_VERIFY')
 
 export const createUsuario = async (request: Request, response: Response) => {
     const  usuario = request.body
-    const { usu_tag, usu_email } = usuario
+    const { usu_email, usu_nome } = usuario
     try { 
-        if(usu_tag === undefined)
+        if (usuario.usu_tag === undefined)
             usuario.usu_tag = getEmailTag(usu_email)
 
         const novoUsuario = await UsuarioController.create({ 
-            usu_oab: usuario.usu_oab,
+            usu_nome,
+            usu_oab: usuario.usu_oab || 'AA888888',
             usu_email,
             usu_senha: usuario.usu_senha,
-            usu_administrador: usuario.usu_administrador || false,
-            usu_tag,
+            //usu_administrador: usuario.usu_administrador || false,
+            usu_administrador: false,
+            usu_tag: usuario.usu_tag,
         })
 
         response.status(httpCodes.CREATED).json(novoUsuario)
