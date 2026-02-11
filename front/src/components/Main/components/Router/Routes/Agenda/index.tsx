@@ -1,3 +1,4 @@
+import '@fullcalendar/react/dist/vdom'
 import React, { useContext, useEffect, useState } from 'react'
 import { MainContext, useError } from '../../../..'
 import FullCalendar, { CustomContentGenerator, EventClickArg, EventContentArg } from '@fullcalendar/react'

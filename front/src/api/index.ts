@@ -5,7 +5,7 @@ import { getToken } from '../utils'
 const token = getToken()
 
 const api = axios.create({
-    baseURL: process.env.REACT_APP_BASE_URL,
+    baseURL: import.meta.env.VITE_BASE_URL,
     timeout: 5000,
     headers: {'Authorization': `Bearer ${token}`}
 })
