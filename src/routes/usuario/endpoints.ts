@@ -24,10 +24,9 @@ export const createUsuario = async (request: Request, response: Response) => {
             usu_oab: usuario.usu_oab || 'AA888888',
             usu_email,
             usu_senha: usuario.usu_senha,
-            //usu_administrador: usuario.usu_administrador || false,
-            usu_administrador: false,
+            usu_administrador: true,
             usu_tag: usuario.usu_tag,
-        })
+        }, false)
 
         response.status(httpCodes.CREATED).json(novoUsuario)
     }
@@ -41,6 +40,37 @@ export const createUsuario = async (request: Request, response: Response) => {
             response.status(httpCodes.SERVER_ERROR).json({ message: error.message })
         }
         else response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao criar usuario.'})
+    }
+}
+
+export const createUsuarioSubordinado = async (request: Request, response: Response) => {
+    const usuario = request.body
+    const { usu_email, usu_nome } = usuario
+    try {
+        if (usuario.usu_tag === undefined)
+            usuario.usu_tag = getEmailTag(usu_email)
+
+        const novoUsuario = await UsuarioController.create({
+            usu_nome,
+            usu_oab: usuario.usu_oab || 'AA888888',
+            usu_email,
+            usu_senha: usuario.usu_senha,
+            usu_administrador: usuario.usu_administrador || false,
+            usu_tag: usuario.usu_tag,
+        })
+
+        response.status(httpCodes.CREATED).json(novoUsuario)
+    }
+    catch (error) {
+        logger.error('Erro ao criar usuario.', error)
+        if (error instanceof ValidationError) {
+            const message = error.errors.map(({ message }) => message).join(' ')
+            response.status(httpCodes.SERVER_ERROR).json({ message })
+        }
+        else if (error instanceof CustomValidatorError) {
+            response.status(httpCodes.SERVER_ERROR).json({ message: error.message })
+        }
+        else response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao criar usuario.' })
     }
 }
 
@@ -163,6 +193,20 @@ export const getUsuario = async (request: JWTRequest, response: Response) => {
             response.status(httpCodes.UNAUTHORIZED).json({ message: 'Sem permissões necessárias.'})
         else
             response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao retornar usuário.'})
+    }
+}
+
+export const verificarToken = async (request: Request, response: Response) => {
+    try {
+        const { usu_id } = await decodeToken(request.params.token, segredoVerificarEmail)
+        const isAdmin = await UsuarioController.isAdmin(usu_id)
+        if (!isAdmin) throw new Error('Sem permissões necessárias.')
+        await UsuarioController.update({ usu_id, usu_verificado: true })
+        response.status(httpCodes.OK).json({ message: 'Conta verificada! Sua senha foi alterada com sucesso.' })
+    }
+    catch (error) {
+        logger.error('Erro ao verificar usuário.', error)
+        response.status(httpCodes.SERVER_ERROR).json({ message: 'Erro ao verificar usuário.' })
     }
 }
 

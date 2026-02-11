@@ -28,9 +28,10 @@ const Login: React.FC = () => {
             setLogado(true)
             navigate('/')
         }
-        catch(error){
+        catch (error: any) {
             setEntrando(false)
-            showError('Erro ao fazer login.')
+            if (error.response && error.response.data && error.response.data)
+                showError(error.response.data?.message || 'Erro ao fazer login.')
         }
     }
 

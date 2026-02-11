@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Col, Container, Form, Row } from 'react-bootstrap'
 import { AppName, mainBackgroundColor, mainBackgroundColor2 } from '../../../../constants'
 import Button from '../Button'
@@ -7,12 +7,14 @@ import { GoLaw } from 'react-icons/go'
 import api from '../../../../api'
 import { MainContext, useError, useMessage, useNotification } from '../..'
 import { useNavigate, useParams } from 'react-router'
+import Loader from '../Loader'
 
 const VerificaoUsuario: React.FC = () => {
 
     const [senhaAtual, setSenhaAtual] = useState("")
     const [novaSenha, setNovaSenha] = useState("")
     const [entrando, setEntrando] = useState(false)
+    const [carregando, setCarregando] = useState(true)
     const { token } = useParams()
     const showError = useError()
     const showMessage = useMessage()
@@ -33,8 +35,30 @@ const VerificaoUsuario: React.FC = () => {
         }
     }
 
+    const verificarToken = async () => {
+        try {
+            if (!token)
+                return
+            await api.get(`usuario/verify/${token}`)
+            navigate('/login')
+            showMessage('Conta verificada! Faça login usando suas credencias.')
+        }
+        catch (error) {
+        }
+        finally {
+            setCarregando(false)
+        }
+    }
+
+    useEffect(() => {
+        verificarToken()
+    }, [])
+
     if(token === undefined)
         return <>Não há nada aqui</>
+
+    if (carregando)
+        return <Loader />
 
     return (
         <CustomContainer>

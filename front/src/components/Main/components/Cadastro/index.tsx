@@ -57,8 +57,8 @@ const Cadastro: React.FC = () => {
 
         setCadastrando(true)
         try{
-            await api.post('/usuario', { usu_nome: nome, usu_email: email, usu_senha: senha })
-            showMessage('Cadastro realizado com sucesso! Você será redirecionado para a página de login.')
+            await api.post('/usuario/admin', { usu_nome: nome, usu_email: email, usu_senha: senha })
+            showMessage(`Um email foi enviado para ${email}.\nEntre no link enviado para seu e-mail para poder realizar login no sistema.`)
             navigate('/login')
         }
         catch(error){

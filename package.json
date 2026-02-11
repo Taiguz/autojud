@@ -12,7 +12,8 @@
     "cron:tarefas": "node ./dist/src/cron/buscarTarefasVencimento.js",
     "cron:andamentos:dev": "npm run build && node ./dist/src/cron/buscarAndamentos.js",
     "cron:tarefas:dev": "npm run build && node ./dist/src/cron/buscarTarefasVencimento.js",
-    "cron:tarefas:debug": "npm run build && node --inspect ./dist/src/cron/buscarTarefasVencimento.js"
+    "cron:tarefas:debug": "npm run build && node --inspect ./dist/src/cron/buscarTarefasVencimento.js",
+    "deploy": "npm run build && ./deploy.sh"
   },
   "dependencies": {
     "axios": "^0.26.0",

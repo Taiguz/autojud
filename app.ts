@@ -10,11 +10,12 @@ import usuarioRouter from './src/routes/usuario'
 import tarefaRouter from './src/routes/tarefa'
 import andamentoRouter from './src/routes/andamento'
 import notificacaoRouter from './src/routes/notificacao'
-import { isProductionEnv } from './src/utils/utils'
+import { getEnv, isProductionEnv } from './src/utils/utils'
 import { buscarTarefasEmVencimento } from './src/notificador/notificadorTarefas'
 import { buscaPeriodicaAndamentos } from './src/buscador'
 import { Request, Response } from 'express'
 
+const appDomain = getEnv('DOMAIN')
 const debug = require('debug')('autojud:server');
 
 const express = require('express');
@@ -29,23 +30,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-if(!isProductionEnv())
+if (isProductionEnv())
+  app.use(cors({ origin: appDomain, credentials: true }))
+else
   app.use(cors())
 
-  
-app.use('/api/processo', processoRouter);
-app.use('/api/andamento', andamentoRouter);
-app.use('/api/usuario', usuarioRouter);
-app.use('/api/tarefa', tarefaRouter)
-app.use('/api/notificacao', notificacaoRouter)
-app.use('/api/', rootRouter);
-
-app.use(express.static(path.join(__dirname, '..', 'front', 'build')));
-
-app.get('/*', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '..', 'front', 'build', 'index.html'));
-});
-
+app.use('/processo', processoRouter)
+app.use('/andamento', andamentoRouter)
+app.use('/usuario', usuarioRouter)
+app.use('/tarefa', tarefaRouter)
+app.use('/notificacao', notificacaoRouter)
+app.use('/', rootRouter);
 
 const normalizePort = (val: string) => {
   const port = parseInt(val, 10);

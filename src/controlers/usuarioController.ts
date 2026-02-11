@@ -23,7 +23,7 @@ const appHostname = getEnv("APP_HOSTNAME")
 const appName = getEnv("APP_NAME")
 
 // TODO: criaçao de usuarios administradores
-export const create = async (usuario: CreateUsuario): Promise<Usuario> => {
+export const create = async (usuario: CreateUsuario, trocarSenha: boolean = true): Promise<Usuario> => {
     const {usu_senha} = usuario
     // usu_senha é uma coluna excepcional que validarei aqui
     // de resto os campos serão validados já nos models
@@ -32,12 +32,12 @@ export const create = async (usuario: CreateUsuario): Promise<Usuario> => {
         throw new CustomValidatorError('A senha do usuário não pode ser vazia.')
     else if(!validator.isLength(usu_senha, { min:8, max:20 }))
         throw new CustomValidatorError('A senha do usuário deve conter de 8 a 20 caracteres.')
-    else if (!validator.isStrongPassword(usu_senha, {minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false}))
+    else if (!validator.isStrongPassword(usu_senha, { minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false }))
         throw new CustomValidatorError('A senha do usuário não possui o formato adequado.')
     const senha = await getHashedPassword(usuario.usu_senha)
     const novoUsuario = {...usuario, usu_senha: senha, usu_verificado: false}
     const createdUsuario = await modelUsuario.create(novoUsuario)
-    sendVerificationEmail(createdUsuario)
+    sendVerificationEmail(createdUsuario, trocarSenha)
     return sanitizeObject(createdUsuario.get(), attributes)
 }
 
@@ -196,11 +196,11 @@ export const decodeToken = async (token: string, secret: string = segredo): Prom
     })
 }
 
-const sendVerificationEmail = async (createdUsuario: ModelUsuario) => {
+const sendVerificationEmail = async (createdUsuario: ModelUsuario, trocarSenha: boolean = true) => {
     const token = await authenticateUser(createdUsuario, '2d', segredoVerificarEmail)
     const txt = `
         <h1>Bem vindo, ${createdUsuario.usu_tag}!</h1>
-        <p>Para começar, verifique sua conta trocando a sua senha no link abaixo.</p>
+        <p>Para começar, verifique sua conta ${trocarSenha ? 'trocando a sua senha' : 'clicando'} no link abaixo.</p>
         <a href="${appHostname}/verify/${token}" target="_blank">
         <button
             style="
