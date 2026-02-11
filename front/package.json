@@ -1,13 +1,12 @@
 {
-  "homepage": "/autojud",
   "name": "front",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@fullcalendar/daygrid": "^5.11.3",
-    "@fullcalendar/list": "^5.11.3",
-    "@fullcalendar/react": "^5.11.2",
-    "@fullcalendar/timegrid": "^5.11.3",
+    "@fullcalendar/react": "5.11.2",
+    "@fullcalendar/daygrid": "5.11.3",
+    "@fullcalendar/list": "5.11.3",
+    "@fullcalendar/timegrid": "5.11.3",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.2.1",
@@ -20,14 +19,13 @@
     "bootstrap": "^5.1.3",
     "date-fns": "^2.29.2",
     "generate-password": "^1.7.0",
-    "react": "^17.0.2",
+    "react": "18.x",
     "react-bootstrap": "^2.1.2",
     "react-bootstrap-icons": "^1.7.2",
-    "react-dom": "^17.0.2",
+    "react-dom": "18.x",
     "react-icons": "^4.4.0",
-    "react-router": "^6.2.2",
-    "react-router-dom": "^6.2.2",
-    "react-scripts": "^0.0.0",
+    "react-router": "7.x",
+    "react-router-dom": "7.x",
     "styled-components": "^5.3.5",
     "typescript": "^4.4.2",
     "uuid": "^8.3.2",
@@ -36,17 +34,12 @@
     "zod": "^4.3.6"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
     "deploy": "yarn run build && ./deploy.sh"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -62,6 +55,10 @@
   },
   "devDependencies": {
     "@types/fullcalendar": "^3.8.0",
-    "@types/styled-components": "^5.1.24"
+    "@types/styled-components": "^5.1.24",
+    "@vitejs/plugin-react": "^5.0.4",
+    "jsdom": "^27.0.1",
+    "vite": "^7.1.11",
+    "vitest": "^3.2.4"
   }
 }
