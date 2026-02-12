@@ -1,13 +1,11 @@
-import database from '../database'
-import { Model } from 'sequelize'
 import { modelAndamento, modelProcesso, modelProcessoResponsavel, modelUsuario } from '../models'
 import { Andamento, CreateAndamento, CreateProcesso, Processo, ProcessoUpdate, Tarefa, Usuario } from './types'
 import { ModelAndamento, ModelProcesso } from '../models/types'
-import { buscarAndamentos } from '../buscador'
+import { buscarAndamentos, removerMonitoramentoProcesso } from '../buscadorV2'
 import { sanitizeObject } from '../utils/utils'
-import { attributes as andamentoAttributes } from './andamentoController'
 import { parseISO } from 'date-fns'
 import { AndamentoController, TarefaController, UsuarioController } from '.'
+import logger from '../utils/logger'
 
 
 // All functions here are expected to throw erros
@@ -34,7 +32,7 @@ export const get = async (pro_id: number): Promise<Processo> => {
     return processo.get()
 }
 
-export const getByCNJ = async (pro_cnj: string): Promise<Processo> => {
+export const getByCNJ = async (pro_cnj: string): Promise<ModelProcesso> => {
     const processo = await modelProcesso.findOne({ where: { pro_cnj },  attributes })
     if(processo === null)
         throw new Error('Processo não existe')
@@ -67,6 +65,12 @@ export const remove = async (pro_id: number) => {
     if (processoExistente === null)
         throw new Error('Processo não existe.')
     await processoExistente.destroy()
+    try {
+        await removerMonitoramentoProcesso(processoExistente)
+    }
+    catch (error) {
+        logger.error(`Erro removendo monitoramento do processo ${pro_id}.`, error)
+    }
 }
 
 export const getAll = async (): Promise<Processo[]> => {
