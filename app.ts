@@ -10,10 +10,8 @@ import usuarioRouter from './src/routes/usuario'
 import tarefaRouter from './src/routes/tarefa'
 import andamentoRouter from './src/routes/andamento'
 import notificacaoRouter from './src/routes/notificacao'
+import callbackRouter from './src/routes/callback'
 import { getEnv, isProductionEnv } from './src/utils/utils'
-import { buscarTarefasEmVencimento } from './src/notificador/notificadorTarefas'
-import { buscaPeriodicaAndamentos } from './src/buscador'
-import { Request, Response } from 'express'
 
 const appDomain = getEnv('DOMAIN')
 const debug = require('debug')('autojud:server');
@@ -40,6 +38,7 @@ app.use('/andamento', andamentoRouter)
 app.use('/usuario', usuarioRouter)
 app.use('/tarefa', tarefaRouter)
 app.use('/notificacao', notificacaoRouter)
+app.use('/callback', callbackRouter)
 app.use('/', rootRouter);
 
 const normalizePort = (val: string) => {
