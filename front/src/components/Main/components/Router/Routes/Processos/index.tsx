@@ -53,9 +53,25 @@ const Processos: React.FC = () => {
             { name: 'Processos', path: '/processos' }])
     }, [setBreadCrumb])
 
+    const sanitizeCnj = (cnj: string) => {
+        const digits = cnj.replace(/\D/g, '').replaceAll('-', '').replaceAll('.', '')
+
+        if (digits.length !== 20)
+            throw new Error('CNJ deve conter exatamente 20 dígitos. Use o formato NNNNNNN-NN.NNNN.N.NN.NNNN.')
+
+        return `${digits.slice(0, 7)}-${digits.slice(7, 9)}.${digits.slice(9, 13)}.${digits.slice(13, 14)}.${digits.slice(14, 16)}.${digits.slice(16, 20)}`
+    }
+
     const adicionarProcesso = async (processo: IProcesso, usu_tag: string) => {
         try{
-            const {pro_cnj, pro_titulo} = processo
+            const { pro_titulo } = processo
+            const pro_cnj = sanitizeCnj(processo.pro_cnj)
+
+            if (!pro_cnj) {
+                showError('CNJ inválido. Use o formato NNNNNNN-NN.NNNN.N.NN.NNNN.')
+                return
+            }
+
             const responsaveis = usu_tag.split(',').map(tag => tag.trim())
             const { data: novoProcesso } = await api.post<IProcesso>('/processo', { pro_cnj, pro_titulo})
             await api.post(`/processo/${novoProcesso.pro_id}/responsavel`, { usu_tag: responsaveis })
@@ -63,7 +79,8 @@ const Processos: React.FC = () => {
             addNotification(`Processo "${novoProcesso.pro_titulo}" adicionado.`)
         }
         catch(erro: any){
-            showError('Houve um erro ao adicionar o processo.', erro as Error)
+            console.log(erro)
+            showError(`Houve um erro ao adicionar o processo. ${erro.message}`, erro as Error)
         }
     }
     

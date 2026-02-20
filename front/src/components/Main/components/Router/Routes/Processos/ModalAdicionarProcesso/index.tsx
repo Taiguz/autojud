@@ -1,12 +1,10 @@
-import React, { FormEvent, useContext, useEffect, useState } from 'react'
-import { Alert, Form, Modal } from 'react-bootstrap'
+import React, { FormEvent, useEffect, useState } from 'react'
+import { Form, Modal } from 'react-bootstrap'
 import Button from '../../../../Button'
 import { IProcesso } from '../../Processo/types'
-import validator from 'validator'
-import { validarProcessoCNJ, validarProcessoResponsaveisTags, validarProcessoTitulo } from '../utils'
+import { getValidacaoProcessoCNJMensagem, validarProcessoCNJ, validarProcessoResponsaveisTags, validarProcessoTitulo } from '../utils'
 import api from '../../../../../../../api'
 import { useError } from '../../../../..'
-import { IUsuario } from '../../Usuario/types'
 import { v4 } from 'uuid'
 import Loader from '../../../../Loader'
 
@@ -25,6 +23,7 @@ const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) =
     const [adicionando, setAdicionando] = useState(false)
     const [carregando, setCarregando] = useState(true)
     const showError = useError()
+    const mensagemValidacaoCNJ = getValidacaoProcessoCNJMensagem(processo.pro_cnj)
 
     useEffect(() => {
         const fetch = async () => {
@@ -86,12 +85,12 @@ const ModalAdicionarProcesso: React.FC<Props> = ({ show, setShow, adicionar }) =
                         <Form.Control 
                             required
                             type="text" 
-                            placeholder="000..." 
+                                placeholder="NNNNNNN-DD.AAAA.J.TR.OOOO"
                             isValid={validar && validarProcessoCNJ(processo.pro_cnj)}
                             isInvalid={validar && !validarProcessoCNJ(processo.pro_cnj)}
                             value={processo.pro_cnj} onChange={({ target: { value } }) => setProcesso({...processo, pro_cnj: value})}
                         />
-                        <Form.Control.Feedback type="invalid">O número de CNJ deve ter um formato válido.</Form.Control.Feedback>
+                            <Form.Control.Feedback type="invalid">{mensagemValidacaoCNJ}</Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Responsável</Form.Label>

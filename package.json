@@ -6,7 +6,7 @@
     "build": "tsc",
     "start": "node ./dist/app.js",
     "start:dev": "npm run build && DEBUG=autojud:* node ./dist/app.js",
-    "start:debug": "npm run build && DEBUG=autojud:* node --inspect ./dist/app.js",
+    "start:debug": "npm run build && node --inspect ./dist/app.js",
     "postinstall": "npm run build && cd front && npm install && npm install --dev && npm run build",
     "cron:andamentos": "node ./dist/src/cron/buscarAndamentos.js",
     "cron:tarefas": "node ./dist/src/cron/buscarTarefasVencimento.js",
