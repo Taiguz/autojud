@@ -51,7 +51,7 @@ const Processo: React.FC = () => {
             try{
                 //TODO: Unificar em uma req só 
                 const { data: processoData } = await api.get<IProcesso>(`/processo/${processoId}`)
-                const { data: {andamentos} } = await api.get<{ andamentos: IAndamento[]}>(`processo/${processoData.pro_id}/andamentos/0`)
+                const { data: {andamentos} } = await api.get<{ andamentos: IAndamento[]}>(`processo/${processoData.pro_id}/andamentos/0?direction=next`)
                 const { data: tarefaData } = await api.get<ITarefa[]>(`processo/${processoData.pro_id}/tarefa`)
                 setProcesso(processoData)
                 setAndamentos(andamentos)

@@ -14,7 +14,7 @@ router.get('/:pro_id', ProcessoEndpoints.getProcesso)
 router.delete('/:pro_id', ProcessoEndpoints.deletarProcesso)
 router.post('/', ProcessoEndpoints.createProcesso)
 router.put('/', ProcessoEndpoints.atualizarProcesso)
-router.get('/:pro_id/andamentos/:start_and_id', ProcessoEndpoints.getAndamentos)
+router.get('/:pro_id/andamentos/:start_and_data', ProcessoEndpoints.getAndamentos)
 router.get('/:pro_id/buscando-andamentos', ProcessoEndpoints.buscandoAndamentos)
 // Responsaveis
 router.get('/:pro_id/responsavel', ProcessoEndpoints.getResponsaveis)

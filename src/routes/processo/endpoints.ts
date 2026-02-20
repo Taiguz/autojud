@@ -99,14 +99,15 @@ export const getProcesso = async (request: Request, response: Response) => {
 
 export const getAndamentos = async (request: Request, response: Response) => {
     try {
-        if(!validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}) ||
-        !validator.isInt(request.params.start_and_id, { allow_leading_zeroes: false}))
+        if(!validator.isInt(request.params.pro_id, { min: 1, allow_leading_zeroes: false}))
             throw new Error('Parâmetros de requisição inválidos.')
         const pro_id = parseInt(request.params.pro_id)
-        const start_and_id = parseInt(request.params.start_and_id)
-        // start_and_id negativo - pagina anterior
-        // start_and_id positivo - pagina sequinte
-        const andamentos = await ProcessoController.getAllAndamentos(pro_id, Math.abs(start_and_id), start_and_id > 0)
+        const startAndData = request.params.start_and_data
+        const direction = request.query.direction === 'prev' ? 'prev' : 'next'
+        if (startAndData !== '0' && !validator.isDate(startAndData))
+            throw new Error('Parâmetros de requisição inválidos.')
+
+        const andamentos = await ProcessoController.getAllAndamentos(pro_id, startAndData, direction === 'prev')
         const total = await AndamentoController.countAndamentosProcesso(pro_id)
         response.status(httpCodes.OK).json({ andamentos, total, page: defaultPageLimit})
     }

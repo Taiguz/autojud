@@ -56,18 +56,24 @@ export const getAll = async () => {
     return andamentos.map(andamento => andamento.get())
 }
 
-export const getAllAndamentoProcesso = async (pro_id: number, last_and_id: number = 0, greater: boolean = false): Promise<Andamento[]> => {
-    let comparator = greater ? Op.gt : Op.lt
+export const getAllAndamentoProcesso = async (pro_id: number, start_and_data: string = '0', greater: boolean = false): Promise<Andamento[]> => {
+    const comparator = greater ? Op.gt : Op.lt
+    const whereAndData = start_and_data === '0'
+        ? { [Op.ne]: null }
+        : { [comparator]: start_and_data }
+
     const andamentos = await modelAndamento.findAll({ 
         where:{
             pro_id,
-            and_id: last_and_id === 0 ? { [Op.gt]: 0 } : { [comparator]: last_and_id }
+            and_data: whereAndData
         },
-        order: (greater && last_and_id !== 0) ? [['and_id', 'ASC']] : [['and_id', 'DESC']],
+        order: (greater && start_and_data !== '0')
+            ? [['and_data', 'ASC'], ['and_id', 'ASC']]
+            : [['and_data', 'DESC'], ['and_id', 'DESC']],
         attributes,
         limit: defaultPageLimit
     })
-    if(greater && last_and_id !== 0)
+    if(greater && start_and_data !== '0')
         return andamentos.map(andamento => andamento.get()).reverse()
     return andamentos.map(andamento => andamento.get())
 }
@@ -76,4 +82,3 @@ export const countAndamentosProcesso = async (pro_id: number): Promise<number> =
     const count = await modelAndamento.count({ where: { pro_id }})
     return count
 }
-

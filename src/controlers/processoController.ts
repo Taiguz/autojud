@@ -83,8 +83,8 @@ export const getAllInstances = async (): Promise<ModelProcesso[]> => {
     return processos
 }
 
-export const getAllAndamentos = async (pro_id: number, last_and_id: number = 0, greater: boolean = true): Promise<Andamento[]> => {
-    const andamentos = await AndamentoController.getAllAndamentoProcesso(pro_id, last_and_id, greater)
+export const getAllAndamentos = async (pro_id: number, start_and_data: string = '0', greater: boolean = true): Promise<Andamento[]> => {
+    const andamentos = await AndamentoController.getAllAndamentoProcesso(pro_id, start_and_data, greater)
     return andamentos
 }
 

@@ -49,7 +49,7 @@ export const buscarAndamentos = async (processo: ModelProcesso, notify: boolean 
         // Notificar responsáveis
         if(ultimoAndamento !== null){
             const novosAndamentos = await AndamentoController
-                .getAllAndamentoProcesso(processo.pro_id, ultimoAndamento.and_id, true)
+                .getAllAndamentoProcesso(processo.pro_id, ultimoAndamento.and_data, true)
             if(novosAndamentos.length === 0){
                 logger.info(`Sem novos andamentos para o processo ${processo.pro_id}.`)
                 return

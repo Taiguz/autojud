@@ -30,7 +30,7 @@ const Andamentos: React.FC = () => {
             try{
                 //TODO: Unificar em uma req só 
                 const { data: processoData } = await api.get<IProcesso>(`/processo/${processoId}`)
-                const { data: { andamentos, total, page} } = await api.get<{ andamentos: IAndamento[], total: number, page: number }>(`processo/${processoData.pro_id}/andamentos/0`)
+                const { data: { andamentos, total, page } } = await api.get<{ andamentos: IAndamento[], total: number, page: number }>(`processo/${processoData.pro_id}/andamentos/0?direction=next`)
                 setProcesso(processoData)
                 setAndamentos(andamentos)
                 setPaginacao({ ...paginacao, totalItens: total, itensPorPagina: page })
@@ -58,11 +58,13 @@ const Andamentos: React.FC = () => {
             return
         const fetchAndamentos = async () => {
             try{
-                const { and_id: ultimoAndamento } = andamentos[andamentos.length - 1]
-                const { and_id: primeiroAndamento } = andamentos[0]
+                const { and_data: ultimaDataAndamento } = andamentos[andamentos.length - 1]
+                const { and_data: primeiraDataAndamento } = andamentos[0]
+                const direction = paginaAnterior > paginaAtual ? 'prev' : 'next'
+                const startAndData = direction === 'prev' ? primeiraDataAndamento : ultimaDataAndamento
                 //TODO: Unificar em uma req só 
                 const { data: { andamentos: andamentosData, total, page} } = await api
-                    .get<{ andamentos: IAndamento[], total: number, page: number }>(`processo/${processo.pro_id}/andamentos/${paginaAnterior > paginaAtual ? primeiroAndamento : `-${ultimoAndamento}`}`)
+                    .get<{ andamentos: IAndamento[], total: number, page: number }>(`processo/${processo.pro_id}/andamentos/${startAndData}?direction=${direction}`)
                 setAndamentos(andamentosData)
                 setPaginacao(paginacao => ({ ...paginacao, totalItens: total, itensPorPagina: page, paginaAnterior: paginaAtual }))
             }
